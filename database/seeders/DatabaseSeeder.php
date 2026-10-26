@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             StoreSettingsSeeder::class,
             RolePermissionSeeder::class,
             SuperAdminSeeder::class,
+            CatalogSeeder::class,
         ]);
     }
 }

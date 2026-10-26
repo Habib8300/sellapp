@@ -62,6 +62,22 @@ it('restricts the admin panel to staff roles', function (): void {
         ->and($manager->canAccessPanel($panel))->toBeTrue();
 });
 
+it('lets a customer switch accounts after an admin panel access denial', function (): void {
+    $customer = User::factory()->create();
+    $customer->assignRole('customer');
+
+    $this->actingAs($customer)
+        ->get('/admin')
+        ->assertForbidden()
+        ->assertSee('সাইন আউট করে অ্যাডমিন লগ ইন');
+
+    $this->actingAs($customer)
+        ->post('/switch-to-admin')
+        ->assertRedirect('/admin/login');
+
+    $this->assertGuest();
+});
+
 it('seeds all Bangladesh divisions, districts, and upazilas idempotently', function (): void {
     $this->seed(BangladeshLocationSeeder::class);
 
