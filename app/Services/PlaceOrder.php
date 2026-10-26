@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendOrderStatusEmail;
 use App\Models\BulkDiscountSlab;
 use App\Models\Campaign;
 use App\Models\Coupon;
@@ -242,6 +243,8 @@ class PlaceOrder
 
             return $order;
         }, attempts: 3);
+
+        SendOrderStatusEmail::dispatch($order->id)->afterCommit();
 
         return ['order' => $order->load(['items', 'payments']), 'access_token' => $accessToken];
     }

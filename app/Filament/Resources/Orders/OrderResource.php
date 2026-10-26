@@ -3,8 +3,11 @@
 namespace App\Filament\Resources\Orders;
 
 use App\Filament\Resources\Orders\Pages\ManageOrders;
+use App\Jobs\SendOrderStatusEmail;
+use App\Jobs\SendOrderStatusSms;
 use App\Models\Order;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -13,6 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderResource extends Resource
 {
@@ -57,6 +61,8 @@ class OrderResource extends Resource
                     'status' => $state,
                     'note' => 'Order status updated in admin panel.',
                 ]);
+                SendOrderStatusEmail::dispatch($record->id)->afterCommit();
+                SendOrderStatusSms::dispatch($record->id)->afterCommit();
             }),
             TextColumn::make('created_at')->dateTime()->sortable(),
         ])->filters([
@@ -70,6 +76,33 @@ class OrderResource extends Resource
                 'cancelled' => 'Cancelled',
                 'returned' => 'Returned',
             ]),
+        ])->headerActions([
+            Action::make('export')
+                ->label('Export orders CSV')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(function (): StreamedResponse {
+                    $orders = Order::query()->with('items')->latest()->limit(5000)->get();
+
+                    return response()->streamDownload(function () use ($orders): void {
+                        $output = fopen('php://output', 'w');
+                        if ($output === false) {
+                            throw new \RuntimeException('Unable to open report export stream.');
+                        }
+                        fwrite($output, "\xEF\xBB\xBF");
+                        fputcsv($output, ['Order', 'Customer', 'Phone', 'Date', 'Status', 'Payment status', 'Product', 'SKU', 'Size', 'Color', 'Quantity', 'Unit price', 'Line total']);
+                        foreach ($orders as $order) {
+                            foreach ($order->items as $item) {
+                                fputcsv($output, [
+                                    $order->order_number, $order->customer_name, $order->customer_phone,
+                                    $order->created_at->toDateTimeString(), $order->status, $order->payment_status,
+                                    $item->product_name, $item->product_sku, $item->size, $item->color,
+                                    $item->quantity, $item->unit_price, $item->line_total,
+                                ]);
+                            }
+                        }
+                        fclose($output);
+                    }, 'orders-'.now()->format('Ymd-His').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+                }),
         ]);
     }
 

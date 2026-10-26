@@ -8,7 +8,12 @@
         <h1 class="mt-2 text-3xl font-bold">সব জার্সি</h1>
         <div class="mt-7 grid gap-8 lg:grid-cols-[16rem_1fr]">
             <form action="{{ route('catalog.index', absolute: false) }}" method="GET" class="h-fit rounded-2xl border border-white/10 bg-slate-900 p-5">
-                <h2 class="font-bold">ফিল্টার</h2>
+                <details class="group">
+                    <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between font-bold [&::-webkit-details-marker]:hidden lg:pointer-events-none lg:min-h-0">
+                        <span>ফিল্টার</span>
+                        <span class="text-sm text-slate-500 group-open:rotate-180 lg:hidden" aria-hidden="true">⌄</span>
+                    </summary>
+                    <div class="mt-3 lg:!block">
                 <label class="mt-4 block text-sm text-slate-300" for="filter-q">খুঁজুন</label>
                 <input id="filter-q" name="q" value="{{ $filters['q'] ?? '' }}" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">
 
@@ -57,14 +62,21 @@
                     <option value="price_asc" @selected(($filters['sort'] ?? '') === 'price_asc')>দাম: কম থেকে বেশি</option>
                     <option value="price_desc" @selected(($filters['sort'] ?? '') === 'price_desc')>দাম: বেশি থেকে কম</option>
                 </select>
-                <button class="mt-5 w-full rounded-lg bg-amber-400 px-4 py-3 font-bold text-slate-950 hover:bg-amber-300">ফিল্টার দেখুন</button>
-                <a href="{{ route('catalog.index', absolute: false) }}" class="mt-3 block text-center text-sm text-slate-400 hover:text-white">ফিল্টার মুছুন</a>
+                <button class="mt-5 min-h-11 w-full rounded-lg bg-amber-400 px-4 py-3 font-bold text-slate-950 hover:bg-amber-300">ফলাফল দেখুন</button>
+                <a href="{{ route('catalog.index', absolute: false) }}" class="mt-2 flex min-h-11 items-center justify-center text-sm text-slate-400 hover:text-white">সব ফিল্টার মুছুন</a>
+                    </div>
+                </details>
             </form>
 
             <div>
-                <p class="mb-4 text-sm text-slate-400">{{ $products->total() }}টি পণ্য পাওয়া গেছে</p>
+                <div class="mb-4 flex items-center justify-between gap-3">
+                    <p class="text-sm text-slate-400">{{ $products->total() }}টি পণ্য পাওয়া গেছে</p>
+                    @if (collect($filters)->filter()->isNotEmpty())
+                        <a href="{{ route('catalog.index', absolute: false) }}" class="shrink-0 text-sm font-semibold text-[#771115] hover:underline">ফিল্টার মুছুন</a>
+                    @endif
+                </div>
                 @if ($products->isNotEmpty())
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                         @foreach ($products as $product)
                             @include('catalog.partials.product-card', ['product' => $product])
                         @endforeach

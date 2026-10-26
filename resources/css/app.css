@@ -2,9 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+    font-family: "Hind Siliguri", sans-serif;
+}
+
 .storefront-theme {
     background-color: #f3f4f6;
     color: #111827;
+    overflow-x: clip;
+}
+
+.storefront-theme .mobile-menu-button {
+    color: #fff !important;
+}
+
+.storefront-theme .nav-cart-button,
+.storefront-theme .nav-cart-button span {
+    color: #fff !important;
+}
+
+.storefront-theme .nav-search-button {
+    color: #fff !important;
+}
+
+.storefront-theme :where(img, video, svg, canvas) {
+    max-width: 100%;
+}
+
+.storefront-theme :where(input, select, textarea) {
+    max-width: 100%;
+}
+
+.storefront-theme :where(button, a, input[type="checkbox"], input[type="radio"]) {
+    touch-action: manipulation;
+}
+
+.storefront-theme :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 3px solid #4285f4;
+    outline-offset: 2px;
+}
+
+.storefront-theme [x-cloak] {
+    display: none !important;
+}
+
+@media (max-width: 639px) {
+    .storefront-theme :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+        font-size: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .storefront-theme *,
+    .storefront-theme *::before,
+    .storefront-theme *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 .storefront-theme [class~="bg-slate-950"] { background-color: #fff; }

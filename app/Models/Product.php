@@ -78,6 +78,11 @@ class Product extends Model
         return $this->hasMany(SizeChart::class)->orderBy('sort_order');
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function getStockStatusAttribute(): string
     {
         if ($this->is_preorder && (! $this->preorder_close_at || $this->preorder_close_at->isToday() || $this->preorder_close_at->isFuture())) {

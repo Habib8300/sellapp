@@ -5,19 +5,19 @@
 @section('content')
     <section class="relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/20 via-slate-950 to-slate-950"></div>
-        <div class="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
+        <div class="relative mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 sm:py-16 lg:grid-cols-[1.2fr_.8fr] lg:items-center lg:gap-10 lg:py-24">
             <div>
                 <p class="text-sm font-semibold uppercase tracking-[.22em] text-amber-300">Dhakebir Jersey House</p>
-                <h1 class="mt-5 max-w-3xl text-4xl font-black leading-tight sm:text-6xl">
+                <h1 class="mt-4 max-w-3xl text-3xl font-black leading-tight sm:mt-5 sm:text-5xl lg:text-6xl">
                     আপনার ক্যাম্পাস।<br>আপনার পরিচয়। <span class="text-amber-400">আপনার জার্সি।</span>
                 </h1>
-                <p class="mt-6 max-w-xl leading-8 text-slate-300">বিশ্ববিদ্যালয়ের জন্য আরামদায়ক, মানসম্মত জার্সি—আপনার ব্যাচ ও ক্যাম্পাসের গর্ব সঙ্গে নিয়ে চলুন।</p>
-                <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="{{ route('catalog.index', absolute: false) }}" class="rounded-xl bg-amber-400 px-6 py-3 font-bold text-slate-950 hover:bg-amber-300">জার্সি দেখুন</a>
-                    <a href="#categories" class="rounded-xl border border-white/20 px-6 py-3 font-semibold hover:bg-white/10">ক্যাটাগরি দেখুন</a>
+                <p class="mt-4 max-w-xl leading-7 text-slate-300 sm:mt-6 sm:leading-8">বিশ্ববিদ্যালয়ের জন্য আরামদায়ক, মানসম্মত জার্সি—আপনার ব্যাচ ও ক্যাম্পাসের গর্ব সঙ্গে নিয়ে চলুন।</p>
+                <div class="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
+                    <a href="{{ route('catalog.index', absolute: false) }}" class="flex min-h-12 items-center justify-center rounded-xl bg-amber-400 px-6 py-3 text-center font-bold text-slate-950 hover:bg-amber-300">জার্সি দেখুন</a>
+                    <a href="#categories" class="flex min-h-12 items-center justify-center rounded-xl border border-white/20 px-6 py-3 text-center font-semibold hover:bg-white/10">ক্যাটাগরি দেখুন</a>
                 </div>
             </div>
-            <div class="rounded-3xl border border-amber-300/20 bg-slate-900/70 p-8 shadow-2xl shadow-amber-950/30">
+            <div class="rounded-3xl border border-amber-300/20 bg-slate-900/70 p-5 shadow-xl shadow-amber-950/20 sm:p-8">
                 <p class="text-sm font-semibold text-amber-300">ক্যাম্পাস কালেকশন</p>
                 <p class="mt-3 text-3xl font-bold">নিজের দল, নিজের রঙ</p>
                 <p class="mt-3 text-slate-300">ফুটবল, ক্রিকেট, পোলো এবং আরও অনেক ডিজাইন। সাইজ ও রঙ বেছে নিয়ে সহজেই অর্ডার করুন।</p>
@@ -29,6 +29,22 @@
             </div>
         </div>
     </section>
+
+    @if ($banners->isNotEmpty())
+        <section aria-label="Store announcements" class="mx-auto grid max-w-7xl gap-4 px-4 pt-8 sm:px-6 md:grid-cols-2 lg:grid-cols-3">
+            @foreach ($banners as $banner)
+                <a href="{{ $banner->link_url ?: route('catalog.index', absolute: false) }}" class="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    @if ($banner->image_path)
+                        <img src="{{ asset('storage/'.$banner->image_path) }}" alt="{{ $banner->title }}" loading="lazy" class="h-48 w-full object-cover transition group-hover:scale-[1.02]">
+                    @endif
+                    <div class="p-4">
+                        <h2 class="font-bold text-[#771115]">{{ $banner->title }}</h2>
+                        @if ($banner->subtitle)<p class="mt-1 text-sm text-gray-600">{{ $banner->subtitle }}</p>@endif
+                    </div>
+                </a>
+            @endforeach
+        </section>
+    @endif
 
     <section id="categories" class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div class="flex items-end justify-between gap-4">
@@ -61,7 +77,7 @@
             <a href="{{ route('catalog.index', absolute: false) }}" class="text-sm text-slate-300 hover:text-amber-300">সব পণ্য →</a>
         </div>
         @if ($products->isNotEmpty())
-            <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
                 @foreach ($products as $product)
                     @include('catalog.partials.product-card', ['product' => $product])
                 @endforeach

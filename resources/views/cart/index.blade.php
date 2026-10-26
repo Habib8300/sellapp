@@ -13,7 +13,7 @@
         @else
             <div class="mt-6 space-y-4">
                 @foreach ($items as $item)
-                    <article class="grid gap-4 rounded-2xl border border-white/10 bg-slate-900 p-4 sm:grid-cols-[7rem_1fr_auto] sm:items-center">
+                    <article class="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-white/10 bg-slate-900 p-3 sm:grid-cols-[7rem_minmax(0,1fr)_auto] sm:gap-4 sm:p-4">
                         <a href="{{ route('catalog.show', ['slug' => $item['variant']->product->slug], absolute: false) }}" class="aspect-square overflow-hidden rounded-xl bg-slate-800">
                             @if ($item['variant']->product->images->isNotEmpty())
                                 <img src="/storage/{{ ltrim($item['variant']->product->images->first()->image_path, '/') }}" alt="{{ $item['variant']->product->name }}" class="h-full w-full object-cover">
@@ -36,7 +36,7 @@
                             </form>
                             @error('quantity')<p class="mt-1 text-sm text-rose-300">{{ $message }}</p>@enderror
                         </div>
-                        <div class="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
+                        <div class="col-span-full flex items-center justify-between gap-4 border-t border-white/10 pt-3 sm:col-span-1 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
                             <p class="font-bold text-amber-300">৳{{ number_format($item['line_total']) }}</p>
                             <form action="{{ route('cart.remove', ['line' => $item['key']], absolute: false) }}" method="POST">
                                 @csrf

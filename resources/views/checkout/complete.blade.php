@@ -22,6 +22,12 @@
                     <div class="flex justify-between text-sm"><span>এখন পরিশোধযোগ্য</span><span>৳{{ number_format((float) $order->amount_due_now) }}</span></div>
                     <div class="flex justify-between text-sm"><span>ডেলিভারির সময় বাকি</span><span>৳{{ number_format((float) $order->total - (float) $order->amount_due_now) }}</span></div>
                 @endif
+                @if ($order->shipment?->tracking_number)
+                    <div class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                        কুরিয়ার: {{ $order->shipment->courier }} · ট্র্যাকিং: {{ $order->shipment->tracking_number }}
+                        @if ($order->shipment->tracking_url)<a class="ml-2 underline" href="{{ $order->shipment->tracking_url }}" target="_blank" rel="noopener">ট্র্যাক করুন</a>@endif
+                    </div>
+                @endif
             </div>
             <div class="mt-5 rounded-xl border border-white/10 p-4 text-sm">
                 <p>পেমেন্ট: <strong>{{ strtoupper($order->payment_method) }}</strong> · স্ট্যাটাস: <strong>{{ ucfirst($order->payment_status) }}</strong></p>

@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CmsController;
+use App\Http\Controllers\CustomerAccountController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PhaseFiveController;
 use App\Http\Controllers\ProfileController;
@@ -12,6 +14,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
+Route::get('/sitemap.xml', [CmsController::class, 'sitemap'])->name('sitemap');
+Route::get('/pages/{slug}', [CmsController::class, 'page'])->name('cms.page');
+Route::get('/blog', [CmsController::class, 'blogIndex'])->name('blog.index');
+Route::get('/blog/{slug}', [CmsController::class, 'blogPost'])->name('blog.show');
+Route::get('/track-order', [CustomerAccountController::class, 'trackForm'])->name('orders.track');
+Route::post('/track-order', [CustomerAccountController::class, 'track'])->middleware('throttle:checkout')->name('orders.track.submit');
 Route::get('/products', [StorefrontController::class, 'index'])->name('catalog.index');
 Route::get('/products/{slug}', [StorefrontController::class, 'show'])->name('catalog.show');
 
@@ -39,11 +47,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/student-verification', [PhaseFiveController::class, 'studentVerification'])->middleware('throttle:checkout')->name('student-verification.store');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [CustomerAccountController::class, 'dashboard'])->name('dashboard');
+    Route::post('/addresses', [CustomerAccountController::class, 'storeAddress'])->name('addresses.store');
+    Route::delete('/addresses/{address}', [CustomerAccountController::class, 'destroyAddress'])->name('addresses.destroy');
+    Route::post('/order-items/{orderItem}/review', [CustomerAccountController::class, 'review'])->middleware('throttle:checkout')->name('reviews.store');
+    Route::post('/order-items/{orderItem}/return', [CustomerAccountController::class, 'returnRequest'])->middleware('throttle:checkout')->name('returns.store');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

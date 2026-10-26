@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Collection;
 use App\Models\Product;
@@ -15,6 +16,13 @@ class StorefrontController extends Controller
     public function home(): View
     {
         return view('storefront', [
+            'banners' => Banner::query()
+                ->where('is_active', true)
+                ->where(fn (Builder $query) => $query->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
+                ->where(fn (Builder $query) => $query->whereNull('ends_at')->orWhere('ends_at', '>=', now()))
+                ->orderBy('sort_order')
+                ->limit(5)
+                ->get(),
             'categories' => Category::query()
                 ->where('is_active', true)
                 ->orderBy('sort_order')
@@ -109,7 +117,7 @@ class StorefrontController extends Controller
     public function show(string $slug): View
     {
         $product = $this->publishedProducts()
-            ->with(['category', 'collections', 'images', 'variants', 'sizeCharts'])
+            ->with(['category', 'collections', 'images', 'variants', 'sizeCharts', 'reviews' => fn ($query) => $query->where('is_approved', true)->with('user')->latest()])
             ->where('slug', $slug)
             ->firstOrFail();
 
@@ -123,7 +131,28 @@ class StorefrontController extends Controller
 
         $customizationPrintCharge = (float) (Setting::query()->where('key', 'customization_print_charge')->value('value') ?: 150);
 
-        return view('catalog.show', compact('product', 'related', 'customizationPrintCharge'));
+        $reviewAverage = $product->reviews->avg('rating');
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => $product->name_bn ?: $product->name,
+            'description' => $product->description,
+            'sku' => $product->sku,
+            'offers' => [
+                '@type' => 'Offer',
+                'priceCurrency' => 'BDT',
+                'price' => (float) $product->price,
+                'availability' => $product->stock_status === 'out_of_stock' ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+                'url' => url()->current(),
+            ],
+            'aggregateRating' => $reviewAverage ? [
+                '@type' => 'AggregateRating',
+                'ratingValue' => round($reviewAverage, 1),
+                'reviewCount' => $product->reviews->count(),
+            ] : null,
+        ];
+
+        return view('catalog.show', compact('product', 'related', 'customizationPrintCharge', 'reviewAverage', 'structuredData'));
     }
 
     private function publishedProducts(): Builder

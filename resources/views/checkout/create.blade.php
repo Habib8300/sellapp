@@ -3,16 +3,16 @@
 @section('title', 'চেকআউট')
 
 @section('content')
-    <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <h1 class="text-3xl font-bold">চেকআউট</h1>
+    <section class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+        <h1 class="text-2xl font-bold sm:text-3xl">চেকআউট</h1>
         @if ($errors->any())
             <div class="mt-5 rounded-xl border border-rose-400/30 bg-rose-400/10 p-4 text-rose-200">
                 <p class="font-semibold">অর্ডার সম্পন্ন হয়নি। তথ্যগুলো যাচাই করুন।</p>
                 <ul class="mt-2 list-inside list-disc text-sm">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
             </div>
         @endif
-        <div class="mt-7 grid gap-8 lg:grid-cols-[1fr_22rem]">
-            <form action="{{ route('checkout.store', absolute: false) }}" method="POST" x-data="checkoutForm()" class="space-y-6">
+        <div class="mt-6 grid min-w-0 gap-6 lg:mt-7 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8" x-data="checkoutForm()">
+            <form action="{{ route('checkout.store', absolute: false) }}" method="POST" class="min-w-0 space-y-6">
                 @csrf
                 <section class="rounded-2xl border border-white/10 bg-slate-900 p-5 sm:p-6">
                     <h2 class="text-xl font-bold">যোগাযোগের তথ্য</h2>
@@ -92,10 +92,10 @@
                     <label for="order-note" class="text-lg font-bold">অর্ডার নোট (ঐচ্ছিক)</label>
                     <textarea id="order-note" name="order_note" rows="3" maxlength="1000" class="mt-3 w-full rounded-lg border-white/10 bg-slate-950 text-white">{{ old('order_note') }}</textarea>
                 </section>
-                <button class="w-full rounded-xl bg-amber-400 px-6 py-4 text-lg font-bold text-slate-950 hover:bg-amber-300">অর্ডার নিশ্চিত করুন</button>
+                <button class="min-h-14 w-full rounded-xl bg-amber-400 px-6 py-4 text-lg font-bold text-slate-950 hover:bg-amber-300">অর্ডার নিশ্চিত করুন</button>
             </form>
 
-            <aside class="h-fit rounded-2xl border border-white/10 bg-slate-900 p-5 lg:sticky lg:top-24">
+            <aside class="h-fit rounded-2xl border border-white/10 bg-slate-900 p-4 sm:p-5 lg:sticky lg:top-24">
                 <h2 class="text-xl font-bold">অর্ডার সারাংশ</h2>
                 <div class="mt-4 space-y-4">
                     @foreach ($items as $item)

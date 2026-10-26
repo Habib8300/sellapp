@@ -2,11 +2,14 @@
 
 @section('title', $product->name_bn ?: $product->name)
 @section('description', $product->description ?: ($product->name_bn ?: $product->name))
+@section('structured-data')
+    <script type="application/ld+json">@json($structuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)</script>
+@endsection
 
 @section('content')
-    <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+    <section class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
         <nav class="mb-6 text-sm text-slate-400"><a href="{{ route('catalog.index', absolute: false) }}" class="hover:text-white">জার্সি</a> / {{ $product->category->name_bn ?: $product->category->name }}</nav>
-        <div class="grid gap-10 lg:grid-cols-2">
+        <div class="grid min-w-0 gap-7 lg:grid-cols-2 lg:gap-10">
             <div x-data="{ activeImage: 0, images: @js($product->images->map(fn ($image) => ['src' => '/storage/'.ltrim($image->image_path, '/'), 'alt' => $image->alt_text ?: $product->name])->values()) }">
                 <div class="relative aspect-square overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-800 via-slate-900 to-amber-950">
                     <template x-if="images.length">
@@ -17,9 +20,9 @@
                     </template>
                 </div>
                 @if ($product->images->count() > 1)
-                    <div class="mt-3 flex gap-3 overflow-x-auto">
+                    <div class="mt-3 flex gap-3 overflow-x-auto pb-1">
                         @foreach ($product->images as $index => $image)
-                            <button type="button" @click="activeImage = {{ $index }}" aria-label="{{ $image->view }} image" class="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-white/10">
+                            <button type="button" @click="activeImage = {{ $index }}" aria-label="{{ $image->view }} image" :aria-pressed="activeImage === {{ $index }}" class="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 sm:h-20 sm:w-20">
                                 <img src="/storage/{{ ltrim($image->image_path, '/') }}" alt="{{ $image->alt_text ?: $product->name }}" class="h-full w-full object-cover">
                             </button>
                         @endforeach
@@ -29,7 +32,7 @@
 
             <div>
                 <p class="text-sm font-semibold text-amber-300">{{ $product->category->name_bn ?: $product->category->name }}</p>
-                <h1 class="mt-2 text-3xl font-black sm:text-4xl">{{ $product->name_bn ?: $product->name }}</h1>
+                <h1 class="mt-2 break-words text-2xl font-black sm:text-4xl">{{ $product->name_bn ?: $product->name }}</h1>
                 <p class="mt-2 text-sm text-slate-400">SKU: {{ $product->sku }}</p>
                 <div class="mt-5 flex items-baseline gap-3">
                     <span class="text-3xl font-bold text-amber-300">৳{{ number_format((float) $product->price) }}</span>
@@ -52,6 +55,24 @@
                 @if ($product->description)
                     <div class="prose prose-invert mt-6 max-w-none text-slate-300">{!! nl2br(e($product->description)) !!}</div>
                 @endif
+                <section class="mt-8 border-t border-white/10 pt-6">
+                    <h2 class="text-xl font-bold">ক্রেতাদের রিভিউ</h2>
+                    @if ($product->reviews->isNotEmpty())
+                        <p class="mt-2 text-sm text-gray-600">গড় রেটিং: {{ number_format((float) $reviewAverage, 1) }} / 5 · {{ $product->reviews->count() }}টি যাচাইকৃত রিভিউ</p>
+                        <div class="mt-4 space-y-4">
+                            @foreach ($product->reviews as $review)
+                                <article class="rounded-xl border border-white/10 bg-white p-4">
+                                    <p class="font-semibold">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }} · {{ $review->user->name }}</p>
+                                    @if ($review->title)<h3 class="mt-1 font-semibold">{{ $review->title }}</h3>@endif
+                                    <p class="mt-1 text-sm text-gray-700">{{ $review->body }}</p>
+                                    @if ($review->photo_path)<img src="{{ asset('storage/'.$review->photo_path) }}" alt="Customer review photo" loading="lazy" class="mt-3 max-h-64 rounded-lg">@endif
+                                </article>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="mt-2 text-sm text-gray-500">এখনও কোনো অনুমোদিত রিভিউ নেই।</p>
+                    @endif
+                </section>
                 <div class="mt-5 flex flex-wrap gap-2 text-sm text-slate-300">
                     @if ($product->fabric_type)<span class="rounded-lg bg-white/5 px-3 py-2">{{ $product->fabric_type }}</span>@endif
                     @if ($product->gsm)<span class="rounded-lg bg-white/5 px-3 py-2">{{ $product->gsm }} GSM</span>@endif
@@ -72,12 +93,12 @@
                             @endforeach
                         </select>
                         @error('variant_id')<p class="mt-2 text-sm text-rose-300">{{ $message }}</p>@enderror
-                        <div class="mt-4 flex gap-3">
-                            <div class="w-28">
+                        <div class="mt-4 grid grid-cols-[5rem_minmax(0,1fr)] gap-3 sm:grid-cols-[7rem_minmax(0,1fr)]">
+                            <div>
                                 <label for="quantity" class="block text-sm text-slate-300">পরিমাণ</label>
                                 <input id="quantity" type="number" name="quantity" min="1" max="20" value="1" required class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">
                             </div>
-                            <button class="mt-auto flex-1 rounded-lg bg-amber-400 px-5 py-3 font-bold text-slate-950 hover:bg-amber-300">কার্টে যোগ করুন</button>
+                            <button class="mt-auto min-h-12 rounded-lg bg-amber-400 px-3 py-3 font-bold text-slate-950 hover:bg-amber-300 sm:px-5">কার্টে যোগ করুন</button>
                         </div>
                         @error('quantity')<p class="mt-2 text-sm text-rose-300">{{ $message }}</p>@enderror
                         @if ($product->customization_enabled)
@@ -157,7 +178,7 @@
     @if ($related->isNotEmpty())
         <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6">
             <h2 class="text-2xl font-bold">একই ক্যাটাগরির আরও জার্সি</h2>
-            <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
                 @foreach ($related as $product)
                     @include('catalog.partials.product-card', ['product' => $product])
                 @endforeach

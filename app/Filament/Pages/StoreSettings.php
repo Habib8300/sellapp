@@ -50,6 +50,9 @@ class StoreSettings extends Page
             'customization_print_charge' => '150',
             'advance_payment_percent' => '50',
             'student_discount_percent' => '5',
+            'sms_gateway_url' => '',
+            'sms_api_key' => '',
+            'sms_sender_id' => '',
             'payment_bkash_instructions' => '',
             'payment_nagad_instructions' => '',
             'payment_rocket_instructions' => '',
@@ -112,6 +115,19 @@ class StoreSettings extends Page
                         TextInput::make('payment_rocket_instructions')->label('Rocket instructions')->maxLength(500),
                     ])
                     ->columns(2),
+                Section::make('SMS gateway')
+                    ->description('Configure a form-encoded SMS endpoint that accepts api_key, sender_id, number, and message fields. Leave the endpoint empty to disable status SMS.')
+                    ->schema([
+                        TextInput::make('sms_gateway_url')->label('Gateway endpoint')->url()->maxLength(255),
+                        TextInput::make('sms_sender_id')->label('Sender ID')->maxLength(80),
+                        TextInput::make('sms_api_key')
+                            ->label('API key')
+                            ->password()
+                            ->revealable()
+                            ->dehydrated(fn (?string $state): bool => filled($state))
+                            ->dehydrateStateUsing(fn (string $state): string => $state),
+                    ])
+                    ->columns(2),
             ])
             ->statePath('data');
     }
@@ -119,6 +135,9 @@ class StoreSettings extends Page
     public function save(): void
     {
         foreach ($this->form->getState() as $key => $value) {
+            if ($key === 'sms_api_key' && blank($value)) {
+                continue;
+            }
             Setting::updateOrCreate(
                 ['key' => $key],
                 ['value' => is_scalar($value) ? (string) $value : null],
