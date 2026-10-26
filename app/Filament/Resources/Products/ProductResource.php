@@ -90,6 +90,15 @@ class ProductResource extends Resource
                         Toggle::make('is_active')->label('Published')->default(false),
                         Toggle::make('is_limited_edition'),
                         Toggle::make('is_preorder')->live(),
+                        Toggle::make('customization_enabled')
+                            ->label('Allow name and number printing')
+                            ->live(),
+                        TextInput::make('customization_price')
+                            ->label('Customization charge per item')
+                            ->numeric()
+                            ->minValue(0)
+                            ->prefix('৳')
+                            ->visible(fn (callable $get): bool => (bool) $get('customization_enabled')),
                         DatePicker::make('preorder_estimated_delivery_at')
                             ->visible(fn (callable $get): bool => (bool) $get('is_preorder'))
                             ->required(fn (callable $get): bool => (bool) $get('is_preorder'))

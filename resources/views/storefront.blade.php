@@ -1,45 +1,73 @@
-<!DOCTYPE html>
-<html lang="bn">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#111827">
-        <meta name="description" content="ঢাকেবির জার্সি হাউজ — বিশ্ববিদ্যালয়ের জার্সি, ক্যাম্পাসের গর্ব।">
-        <title>ঢাকেবির জার্সি হাউজ | Dhakebir Jersey House</title>
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="min-h-screen bg-gray-950 text-white antialiased">
-        <header class="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-            <a href="/" class="text-lg font-bold tracking-tight">
-                <span class="text-amber-400">ঢাকেবির</span> জার্সি হাউজ
-            </a>
-            <nav class="flex items-center gap-3 text-sm">
-                <a href="{{ route('login', absolute: false) }}" class="rounded-lg px-4 py-2 text-gray-200 hover:bg-white/10">লগ ইন</a>
-                <a href="{{ route('register', absolute: false) }}" class="rounded-lg bg-amber-400 px-4 py-2 font-semibold text-gray-950 hover:bg-amber-300">অ্যাকাউন্ট খুলুন</a>
-            </nav>
-        </header>
+@extends('layouts.store')
 
-        <main class="mx-auto flex min-h-[75vh] max-w-6xl flex-col justify-center px-6 py-16">
-            <p class="mb-5 text-sm font-semibold uppercase tracking-[0.2em] text-amber-400">Dhakebir Jersey House</p>
-            <h1 class="max-w-3xl text-4xl font-bold leading-tight sm:text-6xl">
-                আপনার ক্যাম্পাস।<br>
-                আপনার পরিচয়। <span class="text-amber-400">আপনার জার্সি।</span>
-            </h1>
-            <p class="mt-6 max-w-xl text-lg leading-8 text-gray-300">
-                বিশ্ববিদ্যালয়ের জার্সি হাউজ তৈরি হচ্ছে। অ্যাকাউন্ট খুলুন অথবা স্টোর ব্যবস্থাপনার জন্য অ্যাডমিন লগ ইন করুন।
-            </p>
-            <div class="mt-9 flex flex-wrap gap-3">
-                <a href="{{ route('register', absolute: false) }}" class="rounded-lg bg-amber-400 px-6 py-3 font-semibold text-gray-950 hover:bg-amber-300">শুরু করুন</a>
-                <a href="{{ route('login', absolute: false) }}" class="rounded-lg border border-white/20 px-6 py-3 font-semibold hover:bg-white/10">লগ ইন</a>
+@section('title', 'ক্যাম্পাস জার্সি')
+
+@section('content')
+    <section class="relative overflow-hidden border-b border-white/10">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/20 via-slate-950 to-slate-950"></div>
+        <div class="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-[.22em] text-amber-300">Dhakebir Jersey House</p>
+                <h1 class="mt-5 max-w-3xl text-4xl font-black leading-tight sm:text-6xl">
+                    আপনার ক্যাম্পাস।<br>আপনার পরিচয়। <span class="text-amber-400">আপনার জার্সি।</span>
+                </h1>
+                <p class="mt-6 max-w-xl leading-8 text-slate-300">বিশ্ববিদ্যালয়ের জন্য আরামদায়ক, মানসম্মত জার্সি—আপনার ব্যাচ ও ক্যাম্পাসের গর্ব সঙ্গে নিয়ে চলুন।</p>
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <a href="{{ route('catalog.index', absolute: false) }}" class="rounded-xl bg-amber-400 px-6 py-3 font-bold text-slate-950 hover:bg-amber-300">জার্সি দেখুন</a>
+                    <a href="#categories" class="rounded-xl border border-white/20 px-6 py-3 font-semibold hover:bg-white/10">ক্যাটাগরি দেখুন</a>
+                </div>
             </div>
-            <p class="mt-16 text-sm text-gray-400">
-                দোকান পরিচালনা করেন?
-                <a href="/admin" class="text-amber-300 underline underline-offset-4">অ্যাডমিন প্যানেল</a>
-            </p>
-        </main>
+            <div class="rounded-3xl border border-amber-300/20 bg-slate-900/70 p-8 shadow-2xl shadow-amber-950/30">
+                <p class="text-sm font-semibold text-amber-300">ক্যাম্পাস কালেকশন</p>
+                <p class="mt-3 text-3xl font-bold">নিজের দল, নিজের রঙ</p>
+                <p class="mt-3 text-slate-300">ফুটবল, ক্রিকেট, পোলো এবং আরও অনেক ডিজাইন। সাইজ ও রঙ বেছে নিয়ে সহজেই অর্ডার করুন।</p>
+                <div class="mt-7 grid grid-cols-3 gap-3 text-center text-sm">
+                    <div class="rounded-xl bg-white/5 p-4"><span class="block text-2xl">⚽</span>ফুটবল</div>
+                    <div class="rounded-xl bg-white/5 p-4"><span class="block text-2xl">🏏</span>ক্রিকেট</div>
+                    <div class="rounded-xl bg-white/5 p-4"><span class="block text-2xl">👕</span>ক্যাম্পাস</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <footer class="mx-auto max-w-6xl border-t border-white/10 px-6 py-6 text-sm text-gray-400">
-            © {{ date('Y') }} ঢাকেবির জার্সি হাউজ · Dhakebir Jersey House
-        </footer>
-    </body>
-</html>
+    <section id="categories" class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <div class="flex items-end justify-between gap-4">
+            <div><p class="text-sm font-semibold text-amber-300">আপনার পছন্দ বেছে নিন</p><h2 class="mt-2 text-2xl font-bold sm:text-3xl">ক্যাটাগরি</h2></div>
+            <a href="{{ route('catalog.index', absolute: false) }}" class="text-sm text-slate-300 hover:text-amber-300">সব দেখুন →</a>
+        </div>
+        <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+            @foreach ($categories as $category)
+                <a href="{{ route('catalog.index', ['category' => $category->slug], absolute: false) }}" class="rounded-xl border border-white/10 bg-white/5 p-4 text-center font-semibold hover:border-amber-400/60 hover:bg-amber-400/10">
+                    {{ $category->name_bn ?: $category->name }}
+                </a>
+            @endforeach
+        </div>
+    </section>
+
+    @if ($collections->isNotEmpty())
+        <section class="mx-auto max-w-7xl px-4 py-5 sm:px-6">
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="text-sm font-semibold text-slate-400">কালেকশন:</span>
+                @foreach ($collections as $collection)
+                    <a href="{{ route('catalog.index', ['collection' => $collection->slug], absolute: false) }}" class="rounded-full border border-white/15 px-4 py-2 text-sm hover:border-amber-400 hover:text-amber-300">{{ $collection->name_bn ?: $collection->name }}</a>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
+    <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <div class="flex items-end justify-between gap-4">
+            <div><p class="text-sm font-semibold text-amber-300">নতুন ডিজাইন</p><h2 class="mt-2 text-2xl font-bold sm:text-3xl">জনপ্রিয় জার্সি</h2></div>
+            <a href="{{ route('catalog.index', absolute: false) }}" class="text-sm text-slate-300 hover:text-amber-300">সব পণ্য →</a>
+        </div>
+        @if ($products->isNotEmpty())
+            <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach ($products as $product)
+                    @include('catalog.partials.product-card', ['product' => $product])
+                @endforeach
+            </div>
+        @else
+            <p class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-8 text-slate-300">নতুন পণ্য শিগগিরই আসছে।</p>
+        @endif
+    </section>
+@endsection

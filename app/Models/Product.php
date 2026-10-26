@@ -30,6 +30,8 @@ class Product extends Model
         'is_active',
         'is_limited_edition',
         'is_preorder',
+        'customization_enabled',
+        'customization_price',
         'preorder_estimated_delivery_at',
         'preorder_close_at',
         'size_guide',
@@ -44,6 +46,8 @@ class Product extends Model
             'is_active' => 'boolean',
             'is_limited_edition' => 'boolean',
             'is_preorder' => 'boolean',
+            'customization_enabled' => 'boolean',
+            'customization_price' => 'decimal:2',
             'preorder_estimated_delivery_at' => 'date',
             'preorder_close_at' => 'date',
         ];

@@ -45,6 +45,14 @@ class StoreSettings extends Page
             'currency_code' => 'BDT',
             'support_email' => '',
             'support_phone' => '',
+            'delivery_inside_dhaka' => '70',
+            'delivery_outside_dhaka' => '130',
+            'customization_print_charge' => '150',
+            'advance_payment_percent' => '50',
+            'student_discount_percent' => '5',
+            'payment_bkash_instructions' => '',
+            'payment_nagad_instructions' => '',
+            'payment_rocket_instructions' => '',
         ];
         $saved = Setting::query()->pluck('value', 'key')->all();
 
@@ -80,6 +88,28 @@ class StoreSettings extends Page
                             ->maxLength(3),
                         TextInput::make('support_email')->email()->maxLength(255),
                         TextInput::make('support_phone')->tel()->maxLength(30),
+                    ])
+                    ->columns(2),
+                Section::make('Checkout and payments')
+                    ->schema([
+                        TextInput::make('delivery_inside_dhaka')->numeric()->minValue(0)->prefix('৳')->required(),
+                        TextInput::make('delivery_outside_dhaka')->numeric()->minValue(0)->prefix('৳')->required(),
+                        TextInput::make('customization_print_charge')->numeric()->minValue(0)->prefix('৳')->required(),
+                        TextInput::make('advance_payment_percent')
+                            ->label('Advance payment (%)')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(99)
+                            ->required(),
+                        TextInput::make('student_discount_percent')
+                            ->label('Verified student discount (%)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->required(),
+                        TextInput::make('payment_bkash_instructions')->label('bKash instructions')->maxLength(500),
+                        TextInput::make('payment_nagad_instructions')->label('Nagad instructions')->maxLength(500),
+                        TextInput::make('payment_rocket_instructions')->label('Rocket instructions')->maxLength(500),
                     ])
                     ->columns(2),
             ])
