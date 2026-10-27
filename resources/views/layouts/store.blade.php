@@ -1,26 +1,68 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
+    @php
+        $defaultMetaDescription = 'ঢাকেবির জার্সি হাউজ — বিশ্ববিদ্যালয়ের জার্সি, ক্যাম্পাসের গর্ব।';
+        $metaDescription = \App\Models\Setting::query()->where('key', 'meta_description')->value('value') ?: $defaultMetaDescription;
+        $gaId = \App\Models\Setting::query()->where('key', 'google_analytics_id')->value('value');
+        $gtmId = \App\Models\Setting::query()->where('key', 'google_tag_manager_id')->value('value');
+        $pixelId = \App\Models\Setting::query()->where('key', 'facebook_pixel_id')->value('value');
+        $facebookUrl = \App\Models\Setting::query()->where('key', 'facebook_url')->value('value');
+        $instagramUrl = \App\Models\Setting::query()->where('key', 'instagram_url')->value('value');
+        $whatsappNumber = \App\Models\Setting::query()->where('key', 'whatsapp_number')->value('value');
+        $supportPhone = \App\Models\Setting::query()->where('key', 'support_phone')->value('value');
+        $supportEmail = \App\Models\Setting::query()->where('key', 'support_email')->value('value');
+        $brandName = \App\Models\Setting::query()->where('key', 'brand_name')->value('value') ?: 'DCU Jersey House';
+        $brandNameBn = \App\Models\Setting::query()->where('key', 'brand_name_bn')->value('value') ?: 'ঢাকেবির জার্সি হাউজ';
+        $brandTagline = \App\Models\Setting::query()->where('key', 'brand_tagline')->value('value') ?: 'আপনার ক্যাম্পাস, আপনার পরিচয়, আপনার জার্সি।';
+        $brandPrimaryColor = \App\Models\Setting::query()->where('key', 'brand_primary_color')->value('value') ?: '#771115';
+        $brandPrimaryColor = preg_match('/^#[0-9a-fA-F]{6}$/', $brandPrimaryColor) ? $brandPrimaryColor : '#771115';
+    @endphp
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#771115">
-    <meta name="description" content="@yield('description', 'ঢাকেবির জার্সি হাউজ — বিশ্ববিদ্যালয়ের জার্সি, ক্যাম্পাসের গর্ব।')">
-    <meta property="og:title" content="@yield('title', 'ঢাকেবির জার্সি হাউজ') | Dhakebir Jersey House">
-    <meta property="og:description" content="@yield('description', 'ঢাকেবির জার্সি হাউজ — বিশ্ববিদ্যালয়ের জার্সি, ক্যাম্পাসের গর্ব।')">
+    <meta name="description" content="@yield('description', $metaDescription)">
+    <meta property="og:title" content="@yield('title', $brandNameBn) | {{ $brandName }}">
+    <meta property="og:description" content="@yield('description', $metaDescription)">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <title>@yield('title', 'ঢাকেবির জার্সি হাউজ') | Dhakebir Jersey House</title>
+    <title>@yield('title', $brandNameBn) | {{ $brandName }}</title>
+    @if ($gaId)
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ urlencode($gaId) }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '{{ $gaId }}');
+        </script>
+    @endif
+    @if ($gtmId)
+        <script>
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ $gtmId }}');
+        </script>
+    @endif
+    @if ($pixelId)
+        <script>
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+             if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+             t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window, document,'script',
+             'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '{{ $pixelId }}');
+            fbq('track', 'PageView');
+        </script>
+    @endif
     @yield('structured-data')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="storefront-theme min-h-screen bg-gray-100 text-gray-900 antialiased" x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false; $nextTick(() => $refs.sidebarTrigger.focus())">
     <header class="sticky top-2 z-30 mx-2 rounded-2xl border border-white/70 bg-white/75 shadow-lg shadow-gray-900/5 backdrop-blur-xl backdrop-saturate-150 sm:top-4 sm:mx-auto sm:max-w-7xl">
         <div class="mx-auto flex max-w-7xl items-center gap-5 px-4 py-3 sm:px-6 sm:py-4">
-            <a href="{{ route('home', absolute: false) }}" aria-label="Dhakebir Jersey House হোম" class="mr-auto min-w-0 text-base font-bold tracking-tight sm:text-lg">
+            <a href="{{ route('home', absolute: false) }}" aria-label="DCU Jersey House হোম" class="mr-auto min-w-0 text-base font-bold tracking-tight sm:text-lg">
                 <span class="text-[#5d0d11]">ঢাকেবির</span> জার্সি হাউজ
             </a>
             <button x-ref="sidebarTrigger" type="button" class="mobile-menu-button inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-[#4285f4] bg-[#4285f4] text-xl text-white shadow-sm transition hover:bg-[#326fd3] focus-visible:outline-[#4285f4] sm:hidden" @click="menuOpen = true; $nextTick(() => $refs.sidebarClose.focus())" :aria-expanded="menuOpen.toString()" aria-controls="mobile-store-sidebar" aria-label="সাইডবার মেনু খুলুন">
@@ -92,15 +134,69 @@
 
     <main>@yield('content')</main>
 
-    <footer class="mt-16 border-t border-gray-300 bg-white">
-        <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <span>© {{ date('Y') }} ঢাকেবির জার্সি হাউজ · Dhakebir Jersey House</span>
-            <div class="flex flex-wrap gap-x-4 gap-y-2">
-                <a href="{{ route('catalog.index', absolute: false) }}" class="hover:text-[#771115]">সব জার্সি দেখুন</a>
-                <a href="{{ route('quotes.create', absolute: false) }}" class="hover:text-[#771115]">৫০+ পিসের কোট</a>
-                <a href="{{ route('cms.page', ['slug' => 'return-policy'], absolute: false) }}" class="hover:text-[#771115]">রিটার্ন নীতি</a>
-                <a href="{{ route('orders.track', absolute: false) }}" class="hover:text-[#771115]">অর্ডার ট্র্যাক</a>
-                <a href="/admin" class="hover:text-[#771115]">অ্যাডমিন</a>
+    <footer class="store-footer" style="--store-brand: {{ $brandPrimaryColor }}">
+        <div class="store-footer__inner">
+            <div class="store-footer__main">
+                <section class="store-footer__identity" aria-label="{{ $brandName }}">
+                    <a href="{{ route('home', absolute: false) }}" class="store-footer__brand">
+                        <span class="store-footer__brand-mark" aria-hidden="true">DH</span>
+                        <span>
+                            <strong>{{ $brandNameBn }}</strong>
+                            <span class="store-footer__brand-english">{{ $brandName }}</span>
+                        </span>
+                    </a>
+                    <p class="store-footer__tagline">{{ $brandTagline }}</p>
+                    <div class="store-footer__socials" aria-label="সোশ্যাল মিডিয়া">
+                        @if (!blank($facebookUrl))
+                            <a href="{{ $facebookUrl }}" target="_blank" rel="noopener noreferrer">
+                                <svg class="store-footer__icon--facebook" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-8.2h2.8l.4-3.2h-3.2v-2c0-.9.3-1.6 1.6-1.6h1.7V3.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.3H7.3v3.2h2.8V21h3.4Z"/></svg>
+                                Facebook
+                            </a>
+                        @endif
+                        @if (!blank($instagramUrl))
+                            <a href="{{ $instagramUrl }}" target="_blank" rel="noopener noreferrer">
+                                <svg class="store-footer__icon--instagram" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="store-footer__icon-dot" cx="17.5" cy="6.8" r="1"/></svg>
+                                Instagram
+                            </a>
+                        @endif
+                        @if (!blank($whatsappNumber))
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsappNumber) }}" target="_blank" rel="noopener noreferrer">
+                                <svg class="store-footer__icon--whatsapp" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.7a8 8 0 0 1-11.8 7L4 20l1.3-4A8 8 0 1 1 20 11.7Z"/><path d="M9 8.5c.2-.4.4-.4.7-.4h.4c.2 0 .3.1.4.4l.7 1.6c.1.2.1.4-.1.6l-.5.6c-.2.2-.2.3 0 .6.5.8 1.2 1.4 2.1 1.8.3.1.4.1.6-.1l.7-.8c.2-.2.4-.2.6-.1l1.5.7c.2.1.3.2.3.4 0 .3-.2 1-.7 1.4-.5.4-1.1.6-1.8.4-1.1-.3-2.3-.8-3.5-1.9-1-.9-1.7-2.1-1.9-3.1-.2-.9.2-1.6.5-2.1Z"/></svg>
+                                WhatsApp
+                            </a>
+                        @endif
+                    </div>
+                </section>
+
+                <nav class="store-footer__links" aria-label="ফুটার নেভিগেশন">
+                    <h2>দ্রুত লিংক</h2>
+                    <a href="{{ route('cms.page', ['slug' => 'about'], absolute: false) }}">আমাদের সম্পর্কে</a>
+                    <a href="{{ route('catalog.index', absolute: false) }}">সব জার্সি দেখুন</a>
+                    <a href="{{ route('quotes.create', absolute: false) }}">৫০+ পিসের কোট</a>
+                    <a href="{{ route('cms.page', ['slug' => 'return-policy'], absolute: false) }}">রিটার্ন ও এক্সচেঞ্জ নীতি</a>
+                    <a href="{{ route('orders.track', absolute: false) }}">অর্ডার ট্র্যাক</a>
+                </nav>
+
+                <section class="store-footer__contact">
+                    <h2>যোগাযোগ করুন</h2>
+                    <p>আপনার অর্ডার বা পণ্য নিয়ে সাহায্য লাগবে? আমরা পাশে আছি।</p>
+                    @if (!blank($supportPhone))
+                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $supportPhone) }}">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.8 4.8 5c-.9.5-1.3 1.5-1 2.5 1.7 5.9 6.3 10.5 12.2 12.2 1 .3 2-.1 2.5-1l1.2-2.2-4.2-2.1-1.5 1.8a14.7 14.7 0 0 1-5.2-5.2l1.8-1.5L8.5 5.3 7 3.8Z"/></svg>
+                            {{ $supportPhone }}
+                        </a>
+                    @endif
+                    @if (!blank($supportEmail))
+                        <a href="mailto:{{ $supportEmail }}" class="store-footer__email">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+                            {{ $supportEmail }}
+                        </a>
+                    @endif
+                </section>
+            </div>
+            <div class="store-footer__bottom">
+                <span>© {{ date('Y') }} {{ $brandNameBn }} · {{ $brandName }}. সর্বস্বত্ব সংরক্ষিত।</span>
+                <a href="/admin">অ্যাডমিন</a>
             </div>
         </div>
     </footer>

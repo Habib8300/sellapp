@@ -11,11 +11,13 @@ class StoreSettingsSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            'brand_name' => 'Dhakebir Jersey House',
+            'brand_name' => 'DCU Jersey House',
             'brand_name_bn' => 'ঢাকেবির জার্সি হাউজ',
             'brand_tagline' => 'University jerseys, made for your campus.',
             'brand_primary_color' => '#d97706',
             'brand_logo' => '',
+            'maintenance_mode_enabled' => '0',
+            'maintenance_message' => 'We are improving the store and will be back shortly.',
             'default_locale' => 'bn',
             'currency_code' => 'BDT',
             'support_email' => '',

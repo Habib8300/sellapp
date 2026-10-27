@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
+Route::get('/health', [CmsController::class, 'health'])->name('health');
+Route::get('/robots.txt', [CmsController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [CmsController::class, 'sitemap'])->name('sitemap');
 Route::get('/pages/{slug}', [CmsController::class, 'page'])->name('cms.page');
 Route::get('/blog', [CmsController::class, 'blogIndex'])->name('blog.index');

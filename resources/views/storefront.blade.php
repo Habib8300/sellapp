@@ -3,60 +3,194 @@
 @section('title', 'ক্যাম্পাস জার্সি')
 
 @section('content')
-    <section class="relative overflow-hidden border-b border-white/10">
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/20 via-slate-950 to-slate-950"></div>
-        <div class="relative mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 sm:py-16 lg:grid-cols-[1.2fr_.8fr] lg:items-center lg:gap-10 lg:py-24">
-            <div>
-                <p class="text-sm font-semibold uppercase tracking-[.22em] text-amber-300">Dhakebir Jersey House</p>
-                <h1 class="mt-4 max-w-3xl text-3xl font-black leading-tight sm:mt-5 sm:text-5xl lg:text-6xl">
-                    আপনার ক্যাম্পাস।<br>আপনার পরিচয়। <span class="text-amber-400">আপনার জার্সি।</span>
-                </h1>
-                <p class="mt-4 max-w-xl leading-7 text-slate-300 sm:mt-6 sm:leading-8">বিশ্ববিদ্যালয়ের জন্য আরামদায়ক, মানসম্মত জার্সি—আপনার ব্যাচ ও ক্যাম্পাসের গর্ব সঙ্গে নিয়ে চলুন।</p>
-                <div class="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-                    <a href="{{ route('catalog.index', absolute: false) }}" class="flex min-h-12 items-center justify-center rounded-xl bg-amber-400 px-6 py-3 text-center font-bold text-slate-950 hover:bg-amber-300">জার্সি দেখুন</a>
-                    <a href="#categories" class="flex min-h-12 items-center justify-center rounded-xl border border-white/20 px-6 py-3 text-center font-semibold hover:bg-white/10">ক্যাটাগরি দেখুন</a>
-                </div>
-            </div>
-            <div class="rounded-3xl border border-amber-300/20 bg-slate-900/70 p-5 shadow-xl shadow-amber-950/20 sm:p-8">
-                <p class="text-sm font-semibold text-amber-300">ক্যাম্পাস কালেকশন</p>
-                <p class="mt-3 text-3xl font-bold">নিজের দল, নিজের রঙ</p>
-                <p class="mt-3 text-slate-300">ফুটবল, ক্রিকেট, পোলো এবং আরও অনেক ডিজাইন। সাইজ ও রঙ বেছে নিয়ে সহজেই অর্ডার করুন।</p>
-                <div class="mt-7 grid grid-cols-3 gap-3 text-center text-sm">
-                    <div class="rounded-xl bg-white/5 p-4"><span class="block text-2xl">⚽</span>ফুটবল</div>
-                    <div class="rounded-xl bg-white/5 p-4"><span class="block text-2xl">🏏</span>ক্রিকেট</div>
-                    <div class="rounded-xl bg-white/5 p-4"><span class="block text-2xl">👕</span>ক্যাম্পাস</div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @php($heroProduct = $products->first())
+    @if ($heroSlides->isNotEmpty())
+        <section
+            class="home-hero"
+            aria-label="স্বাগতম"
+            x-data="{ activeSlide: 0, slideCount: {{ $heroSlides->count() }} }"
+            @keydown.arrow-right.prevent="activeSlide = (activeSlide + 1) % slideCount"
+            @keydown.arrow-left.prevent="activeSlide = (activeSlide - 1 + slideCount) % slideCount"
+        >
+            @foreach ($heroSlides as $index => $slide)
+                <div
+                    class="home-hero__slide"
+                    @if ($index > 0) x-cloak @endif
+                    x-show="activeSlide === {{ $index }}"
+                    x-transition.opacity.duration.400ms
+                    role="group"
+                    aria-roledescription="স্লাইড"
+                    aria-label="{{ $index + 1 }} / {{ $heroSlides->count() }}"
+                >
+                    <div class="home-hero__inner">
+                        <div class="home-hero__copy">
+                            <p class="home-hero__eyebrow"><span aria-hidden="true"></span> DCU Jersey House</p>
+                            <h1>{{ $slide->title }}</h1>
+                            @if ($slide->subtitle)
+                                <p class="home-hero__description">{{ $slide->subtitle }}</p>
+                            @endif
+                            <div class="home-hero__actions">
+                                <a href="{{ $slide->button_url ?: route('catalog.index', absolute: false) }}" class="home-hero__primary">
+                                    {{ $slide->button_text }}
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                                </a>
+                                <a href="#categories" class="home-hero__secondary">ক্যাটাগরি দেখুন</a>
+                            </div>
+                            <div class="home-hero__highlights" aria-label="জার্সির বৈশিষ্ট্য">
+                                <span><b aria-hidden="true">✓</b> ক্যাম্পাস-অনুপ্রাণিত ডিজাইন</span>
+                                <span><b aria-hidden="true">✓</b> নিজের সাইজ বেছে নিন</span>
+                                <span><b aria-hidden="true">✓</b> সহজ অনলাইন অর্ডার</span>
+                            </div>
+                        </div>
 
-    @if ($banners->isNotEmpty())
-        <section aria-label="Store announcements" class="mx-auto grid max-w-7xl gap-4 px-4 pt-8 sm:px-6 md:grid-cols-2 lg:grid-cols-3">
-            @foreach ($banners as $banner)
-                <a href="{{ $banner->link_url ?: route('catalog.index', absolute: false) }}" class="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                    @if ($banner->image_path)
-                        <img src="{{ asset('storage/'.$banner->image_path) }}" alt="{{ $banner->title }}" loading="lazy" class="h-48 w-full object-cover transition group-hover:scale-[1.02]">
-                    @endif
-                    <div class="p-4">
-                        <h2 class="font-bold text-[#771115]">{{ $banner->title }}</h2>
-                        @if ($banner->subtitle)<p class="mt-1 text-sm text-gray-600">{{ $banner->subtitle }}</p>@endif
+                        <div class="home-hero__visual" aria-label="ক্যাম্পাস জার্সি">
+                            <div class="home-hero__orbit home-hero__orbit--one"></div>
+                            <div class="home-hero__orbit home-hero__orbit--two"></div>
+                            <div class="home-hero__product">
+                                @if ($slide->image_path)
+                                    <img src="{{ asset('storage/'.ltrim($slide->image_path, '/')) }}" alt="{{ $slide->title }}" @if ($index === 0) fetchpriority="high" @else loading="lazy" @endif>
+                                @elseif ($heroProduct?->images->isNotEmpty())
+                                    <img src="{{ asset('storage/'.ltrim($heroProduct->images->first()->image_path, '/')) }}" alt="{{ $heroProduct->images->first()->alt_text ?: ($heroProduct->name_bn ?: $heroProduct->name) }}" @if ($index === 0) fetchpriority="high" @else loading="lazy" @endif>
+                                @else
+                                    <div class="home-hero__placeholder" aria-hidden="true">
+                                        <svg viewBox="0 0 180 190"><path d="m55 19 35 13 35-13 34 22-18 33-18-10v103H57V64L39 74 21 41l34-22Z"/><path d="M69 25c2 15 10 23 21 23s19-8 21-23"/></svg>
+                                    </div>
+                                @endif
+                                <span class="home-hero__product-label">ক্যাম্পাস কালেকশন</span>
+                            </div>
+                            <div class="home-hero__floating home-hero__floating--top"><span aria-hidden="true">✦</span> নিজের দল, নিজের রঙ</div>
+                            <div class="home-hero__floating home-hero__floating--bottom">
+                                <span class="home-hero__floating-caption">DCU Jersey House</span>
+                                <strong>আপনার ক্যাম্পাস, আপনার পরিচয়</strong>
+                            </div>
+                        </div>
                     </div>
-                </a>
+                </div>
             @endforeach
+
+            @if ($heroSlides->count() > 1)
+                <div class="home-hero__controls" aria-label="Welcome slide controls">
+                    <button type="button" class="home-hero__arrow" aria-label="আগের স্লাইড" @click="activeSlide = (activeSlide - 1 + slideCount) % slideCount">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <div class="home-hero__dots" aria-label="স্লাইড বেছে নিন">
+                        @foreach ($heroSlides as $index => $slide)
+                            <button
+                                type="button"
+                                class="home-hero__dot"
+                                :class="{ 'is-active': activeSlide === {{ $index }} }"
+                                :aria-current="activeSlide === {{ $index }} ? 'true' : 'false'"
+                                aria-label="স্লাইড {{ $index + 1 }}"
+                                @click="activeSlide = {{ $index }}"
+                            ></button>
+                        @endforeach
+                    </div>
+                    <button type="button" class="home-hero__arrow" aria-label="পরের স্লাইড" @click="activeSlide = (activeSlide + 1) % slideCount">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+            @endif
         </section>
     @endif
 
-    <section id="categories" class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <div class="flex items-end justify-between gap-4">
-            <div><p class="text-sm font-semibold text-amber-300">আপনার পছন্দ বেছে নিন</p><h2 class="mt-2 text-2xl font-bold sm:text-3xl">ক্যাটাগরি</h2></div>
-            <a href="{{ route('catalog.index', absolute: false) }}" class="text-sm text-slate-300 hover:text-amber-300">সব দেখুন →</a>
-        </div>
-        <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-            @foreach ($categories as $category)
-                <a href="{{ route('catalog.index', ['category' => $category->slug], absolute: false) }}" class="rounded-xl border border-white/10 bg-white/5 p-4 text-center font-semibold hover:border-amber-400/60 hover:bg-amber-400/10">
-                    {{ $category->name_bn ?: $category->name }}
-                </a>
-            @endforeach
+    @if ($banners->isNotEmpty())
+        <section
+            class="home-banners"
+            aria-label="প্রচারমূলক ব্যানার"
+            x-data="{
+                activeIndex: 0,
+                offset: 0,
+                visibleCount: 2,
+                slideCount: {{ $banners->count() }},
+                timer: null,
+                resizeObserver: null,
+                measure() {
+                    this.visibleCount = window.matchMedia('(max-width: 700px)').matches ? 1 : 2;
+                    this.activeIndex = Math.min(this.activeIndex, Math.max(0, this.slideCount - this.visibleCount));
+                    const card = this.$refs.track.querySelector('.home-banner-card');
+                    this.offset = card ? this.activeIndex * card.getBoundingClientRect().width : 0;
+                },
+                next() {
+                    const lastIndex = Math.max(0, this.slideCount - this.visibleCount);
+                    this.activeIndex = this.activeIndex >= lastIndex ? 0 : this.activeIndex + 1;
+                    this.measure();
+                },
+                previous() {
+                    const lastIndex = Math.max(0, this.slideCount - this.visibleCount);
+                    this.activeIndex = this.activeIndex <= 0 ? lastIndex : this.activeIndex - 1;
+                    this.measure();
+                },
+                init() {
+                    this.$nextTick(() => {
+                        this.measure();
+                        this.resizeObserver = new ResizeObserver(() => this.measure());
+                        this.resizeObserver.observe(this.$refs.viewport);
+                        this.timer = window.setInterval(() => this.next(), 10000);
+                    });
+                },
+                destroy() {
+                    window.clearInterval(this.timer);
+                    this.resizeObserver?.disconnect();
+                }
+            }"
+        >
+            <div class="home-banners__viewport" x-ref="viewport">
+                <div class="home-banners__track" x-ref="track" :style="'transform: translate3d(-' + offset + 'px, 0, 0)'">
+                    @foreach ($banners as $banner)
+                        <a
+                            href="{{ $banner->link_url ?: route('catalog.index', absolute: false) }}"
+                            class="home-banner-card"
+                            aria-label="{{ $banner->title }}"
+                        >
+                            @if ($banner->image_path)
+                                <img src="{{ asset('storage/'.ltrim($banner->image_path, '/')) }}" alt="" aria-hidden="true" @if ($loop->first) fetchpriority="high" @else loading="lazy" @endif>
+                            @else
+                                <span class="home-banner-card__fallback" aria-hidden="true">
+                                    <svg viewBox="0 0 180 190"><path d="m55 19 35 13 35-13 34 22-18 33-18-10v103H57V64L39 74 21 41l34-22Z"/><path d="M69 25c2 15 10 23 21 23s19-8 21-23"/></svg>
+                                </span>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+            @if ($banners->count() > 2)
+                <div class="home-banners__controls">
+                    <button type="button" class="home-banners__arrow" aria-label="আগের ব্যানার" @click="previous(); window.clearInterval(timer); timer = window.setInterval(() => next(), 10000)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <span class="home-banners__counter"><span x-text="activeIndex + 1"></span> / <span x-text="Math.max(1, slideCount - visibleCount + 1)"></span></span>
+                    <button type="button" class="home-banners__arrow" aria-label="পরের ব্যানার" @click="next(); window.clearInterval(timer); timer = window.setInterval(() => next(), 10000)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+            @endif
+        </section>
+    @endif
+
+    <section id="categories" class="home-categories">
+        <div class="home-categories__inner">
+            <div class="home-categories__heading">
+                <div>
+                    <p>আপনার পছন্দ বেছে নিন</p>
+                    <h2>ক্যাটাগরি অনুযায়ী জার্সি</h2>
+                    <span>আপনার খেলার ধরন আর ক্যাম্পাসের সঙ্গে মানানসই ডিজাইন খুঁজে নিন।</span>
+                </div>
+                <a href="{{ route('catalog.index', absolute: false) }}">সব ক্যাটাগরি <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="home-categories__grid">
+                @foreach ($categories as $category)
+                    <a href="{{ route('catalog.index', ['category' => $category->slug], absolute: false) }}" class="home-category-card">
+                        <span class="home-category-card__icon" aria-hidden="true">
+                            <svg viewBox="0 0 32 32"><path d="m10 5 6 2 6-2 6 4-3 6-3-2v14H10V13l-3 2-3-6 6-4Z"/><path d="M13 6c.4 2.8 1.4 4.2 3 4.2S18.6 8.8 19 6"/></svg>
+                        </span>
+                        <span class="home-category-card__content">
+                            <span class="home-category-card__index">{{ sprintf('%02d', $loop->iteration) }} <span>COLLECTION</span></span>
+                            <strong>{{ $category->name_bn ?: $category->name }}</strong>
+                        </span>
+                        <span class="home-category-card__arrow" aria-hidden="true">↗</span>
+                    </a>
+                @endforeach
+            </div>
         </div>
     </section>
 
@@ -86,4 +220,37 @@
             <p class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-8 text-slate-300">নতুন পণ্য শিগগিরই আসছে।</p>
         @endif
     </section>
+
+    @if ($blogPosts->isNotEmpty())
+        <section class="home-blog" aria-labelledby="home-blog-title">
+            <div class="home-blog__inner">
+                <div class="home-blog__heading">
+                    <div>
+                        <p>ক্যাম্পাসের গল্প ও আপডেট</p>
+                        <h2 id="home-blog-title">আমাদের ব্লগ</h2>
+                    </div>
+                    <a href="{{ route('blog.index', absolute: false) }}">সব পোস্ট দেখুন <span aria-hidden="true">→</span></a>
+                </div>
+                <div class="home-blog__grid">
+                    @foreach ($blogPosts as $post)
+                        <article class="home-blog__card">
+                            @if ($post->cover_image)
+                                <a class="home-blog__image" href="{{ route('blog.show', ['slug' => $post->slug], absolute: false) }}" tabindex="-1" aria-hidden="true">
+                                    <img src="{{ asset('storage/'.$post->cover_image) }}" alt="" loading="lazy">
+                                </a>
+                            @endif
+                            <div class="home-blog__body">
+                                <p class="home-blog__date">{{ ($post->published_at ?? $post->created_at)->format('d M Y') }}</p>
+                                <h3><a href="{{ route('blog.show', ['slug' => $post->slug], absolute: false) }}">{{ $post->title }}</a></h3>
+                                @if ($post->excerpt)
+                                    <p class="home-blog__excerpt">{{ $post->excerpt }}</p>
+                                @endif
+                                <a class="home-blog__read-more" href="{{ route('blog.show', ['slug' => $post->slug], absolute: false) }}">আরও পড়ুন <span aria-hidden="true">→</span></a>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
 @endsection

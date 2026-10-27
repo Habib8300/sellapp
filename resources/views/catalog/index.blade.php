@@ -7,13 +7,9 @@
         <p class="text-sm font-semibold text-amber-300">ঢাকেবির জার্সি হাউজ</p>
         <h1 class="mt-2 text-3xl font-bold">সব জার্সি</h1>
         <div class="mt-7 grid gap-8 lg:grid-cols-[16rem_1fr]">
-            <form action="{{ route('catalog.index', absolute: false) }}" method="GET" class="h-fit rounded-2xl border border-white/10 bg-slate-900 p-5">
-                <details class="group">
-                    <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between font-bold [&::-webkit-details-marker]:hidden lg:pointer-events-none lg:min-h-0">
-                        <span>ফিল্টার</span>
-                        <span class="text-sm text-slate-500 group-open:rotate-180 lg:hidden" aria-hidden="true">⌄</span>
-                    </summary>
-                    <div class="mt-3 lg:!block">
+            <form action="{{ route('catalog.index', absolute: false) }}" method="GET" class="filter-glass-card h-fit rounded-2xl border border-white/70 bg-white/70 p-5 shadow-xl shadow-gray-900/10 backdrop-blur-xl backdrop-saturate-150">
+                <h2 class="text-lg font-bold">ফিল্টার</h2>
+                <div class="mt-3">
                 <label class="mt-4 block text-sm text-slate-300" for="filter-q">খুঁজুন</label>
                 <input id="filter-q" name="q" value="{{ $filters['q'] ?? '' }}" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">
 
@@ -42,17 +38,25 @@
                 </select>
 
                 <label class="mt-4 block text-sm text-slate-300" for="filter-color">রঙ</label>
-                <input id="filter-color" name="color" value="{{ $filters['color'] ?? '' }}" placeholder="যেমন Black" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">
+                <select id="filter-color" name="color" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">
+                    <option value="">সব রঙ</option>
+                    @foreach ($colors as $color)
+                        <option value="{{ $color }}" @selected(mb_strtolower($filters['color'] ?? '') === mb_strtolower($color))>{{ $color }}</option>
+                    @endforeach
+                </select>
 
                 <div class="mt-4 grid grid-cols-2 gap-2">
-                    <div><label for="min-price" class="text-sm text-slate-300">সর্বনিম্ন ৳</label><input id="min-price" type="number" min="0" name="min_price" value="{{ $filters['min_price'] ?? '' }}" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"></div>
-                    <div><label for="max-price" class="text-sm text-slate-300">সর্বোচ্চ ৳</label><input id="max-price" type="number" min="0" name="max_price" value="{{ $filters['max_price'] ?? '' }}" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"></div>
+                    <div><label for="min-price" class="text-sm text-slate-300">সর্বনিম্ন ৳</label><input id="min-price" type="number" min="{{ $priceRange['min'] }}" max="{{ $priceRange['max'] }}" name="min_price" value="{{ $filters['min_price'] ?? '' }}" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"></div>
+                    <div><label for="max-price" class="text-sm text-slate-300">সর্বোচ্চ ৳</label><input id="max-price" type="number" min="{{ $priceRange['min'] }}" max="{{ $priceRange['max'] }}" name="max_price" value="{{ $filters['max_price'] ?? '' }}" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"></div>
                 </div>
+                <p class="mt-1 text-xs text-slate-400">দাম ৳{{ number_format($priceRange['min']) }}–৳{{ number_format($priceRange['max']) }}</p>
 
                 <label class="mt-4 block text-sm text-slate-300" for="availability">অ্যাভেইলেবিলিটি</label>
                 <select id="availability" name="availability" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">
                     <option value="">সব</option>
                     <option value="in_stock" @selected(($filters['availability'] ?? '') === 'in_stock')>স্টকে আছে</option>
+                    <option value="low_stock" @selected(($filters['availability'] ?? '') === 'low_stock')>কম স্টক</option>
+                    <option value="out_of_stock" @selected(($filters['availability'] ?? '') === 'out_of_stock')>স্টক শেষ</option>
                     <option value="preorder" @selected(($filters['availability'] ?? '') === 'preorder')>প্রি-অর্ডার</option>
                 </select>
 
@@ -64,8 +68,7 @@
                 </select>
                 <button class="mt-5 min-h-11 w-full rounded-lg bg-amber-400 px-4 py-3 font-bold text-slate-950 hover:bg-amber-300">ফলাফল দেখুন</button>
                 <a href="{{ route('catalog.index', absolute: false) }}" class="mt-2 flex min-h-11 items-center justify-center text-sm text-slate-400 hover:text-white">সব ফিল্টার মুছুন</a>
-                    </div>
-                </details>
+                </div>
             </form>
 
             <div>

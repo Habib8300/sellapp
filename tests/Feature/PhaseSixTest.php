@@ -168,7 +168,17 @@ it('publishes CMS content, exposes sitemap URLs, and renders staff-managed shipm
     $this->get('/pages/draft')->assertNotFound();
     $this->get('/blog')->assertOk()->assertSee($post->title);
     $this->get('/blog/'.$post->slug)->assertOk()->assertSee('এই সপ্তাহের নতুন ডিজাইন।');
-    $this->get('/')->assertOk()->assertSee('New season')->assertSee('Fresh designs');
+    $homeResponse = $this->get('/')
+        ->assertOk()
+        ->assertSee('New season')
+        ->assertDontSee('Fresh designs')
+        ->assertSee('home-banners', false)
+        ->assertSee('home-banner-card', false)
+        ->assertSee('window.setInterval(() => this.next(), 10000)', false)
+        ->assertSee($post->title)
+        ->assertSee('home-blog', false);
+    expect(strpos($homeResponse->getContent(), $post->title))
+        ->toBeLessThan(strpos($homeResponse->getContent(), '<footer'));
     $this->seed(CmsPageSeeder::class);
     $this->get('/pages/return-policy')->assertOk()->assertSee('৭ দিনের মধ্যে');
     $this->get('/sitemap.xml')->assertOk()->assertHeader('content-type', 'application/xml; charset=UTF-8')
@@ -180,6 +190,40 @@ it('publishes CMS content, exposes sitemap URLs, and renders staff-managed shipm
     foreach (['reviews', 'return-requests', 'shipments', 'cms-pages', 'banners', 'blog-posts', 'store-reports'] as $path) {
         $this->get('/admin/'.$path)->assertOk();
     }
+});
+
+it('shows published blog posts immediately when no publish date was set and hides scheduled posts', function (): void {
+    $publishedNow = BlogPost::create([
+        'title' => 'Fresh campus blog post',
+        'slug' => 'fresh-campus-blog-post',
+        'body' => 'This post should be visible immediately.',
+        'is_published' => true,
+    ]);
+    $scheduled = BlogPost::create([
+        'title' => 'Scheduled campus blog post',
+        'slug' => 'scheduled-campus-blog-post',
+        'body' => 'This post is scheduled for later.',
+        'published_at' => now()->addDay(),
+        'is_published' => true,
+    ]);
+
+    $blogResponse = $this->get('/blog')
+        ->assertOk()
+        ->assertSee($publishedNow->title)
+        ->assertDontSee($scheduled->title);
+    expect($blogResponse->headers->get('Cache-Control'))->not->toContain('max-age=300');
+    $this->get('/')
+        ->assertOk()
+        ->assertSee($publishedNow->title)
+        ->assertDontSee($scheduled->title);
+    $this->get('/blog/'.$publishedNow->slug)
+        ->assertOk()
+        ->assertSee($publishedNow->body);
+    $this->get('/blog/'.$scheduled->slug)->assertNotFound();
+
+    $this->get('/sitemap.xml')
+        ->assertSee('/blog/'.$publishedNow->slug)
+        ->assertDontSee('/blog/'.$scheduled->slug);
 });
 
 it('tracks orders only when both the order number and phone match', function (): void {
@@ -236,7 +280,7 @@ it('sends branded order status email when the customer provided an email address
     (new SendOrderStatusEmail($order->id))->handle();
 
     Mail::assertSent(OrderStatusMail::class, fn (OrderStatusMail $mail): bool => $mail->order->order_number === $order->order_number);
-    Mail::assertSent(OrderStatusMail::class, fn (OrderStatusMail $mail): bool => str_contains($mail->envelope()->subject, 'Dhakebir Jersey House'));
+    Mail::assertSent(OrderStatusMail::class, fn (OrderStatusMail $mail): bool => str_contains($mail->envelope()->subject, 'DCU Jersey House'));
 });
 
 it('renders mobile navigation and compact catalog controls accessibly', function (): void {

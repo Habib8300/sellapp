@@ -110,6 +110,7 @@ class CheckoutController extends Controller
 
         return view('checkout.complete', [
             'order' => $order,
+            'brandName' => Setting::query()->where('key', 'brand_name')->value('value') ?: 'DCU Jersey House',
             'paymentInstructions' => Setting::query()
                 ->where('key', 'payment_'.$order->payment_method.'_instructions')
                 ->value('value'),
@@ -146,7 +147,7 @@ class CheckoutController extends Controller
 
         $pdf->WriteHTML(view('checkout.invoice', [
             'order' => $order,
-            'brandName' => Setting::query()->where('key', 'brand_name')->value('value') ?: 'Dhakebir Jersey House',
+            'brandName' => Setting::query()->where('key', 'brand_name')->value('value') ?: 'DCU Jersey House',
             'brandNameBangla' => Setting::query()->where('key', 'brand_name_bn')->value('value') ?: 'ঢাকেবির জার্সি হাউজ',
         ])->render());
 

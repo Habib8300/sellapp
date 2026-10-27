@@ -10,7 +10,7 @@
 ## 2. Recommended production .env values
 
 ```env
-APP_NAME="Dhakebir Jersey House"
+APP_NAME="DCU Jersey House"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://shop.example.com
@@ -38,7 +38,7 @@ MAIL_PORT=587
 MAIL_USERNAME=hello@example.com
 MAIL_PASSWORD=secret
 MAIL_FROM_ADDRESS="hello@shop.example.com"
-MAIL_FROM_NAME="Dhakebir Jersey House"
+MAIL_FROM_NAME="DCU Jersey House"
 ```
 
 ## 3. Deployment steps

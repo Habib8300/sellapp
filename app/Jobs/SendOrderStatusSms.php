@@ -25,7 +25,7 @@ class SendOrderStatusSms implements ShouldQueue
     public function handle(): void
     {
         $order = Order::query()->findOrFail($this->orderId);
-        $settings = Setting::query()->whereIn('key', ['sms_gateway_url', 'sms_api_key', 'sms_sender_id'])
+        $settings = Setting::query()->whereIn('key', ['sms_gateway_url', 'sms_api_key', 'sms_sender_id', 'brand_name'])
             ->pluck('value', 'key');
         $endpoint = $settings->get('sms_gateway_url');
         $apiKey = $settings->get('sms_api_key');
@@ -35,7 +35,8 @@ class SendOrderStatusSms implements ShouldQueue
         }
 
         $status = str_replace('_', ' ', $order->status);
-        $message = "Dhakebir Jersey House: Order {$order->order_number} is now {$status}.";
+        $brandName = $settings->get('brand_name') ?: 'DCU Jersey House';
+        $message = "{$brandName}: Order {$order->order_number} is now {$status}.";
         $response = Http::asForm()->timeout(15)->post($endpoint, [
             'api_key' => $apiKey,
             'sender_id' => $settings->get('sms_sender_id'),

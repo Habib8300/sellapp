@@ -20,6 +20,9 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()', false);
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin', false);
         $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none', false);
+        $response->headers->set('X-App-Name', config('app.name', 'DCU Jersey House'), false);
+        $response->headers->set('X-App-Version', config('app.version', 'dev'), false);
+        $response->headers->set('X-App-Environment', config('app.env', 'production'), false);
 
         if ($request->isSecure() || app()->environment('production')) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains', false);

@@ -13,7 +13,9 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'DCU Jersey House'),
+
+    'version' => env('APP_VERSION', 'dev'),
 
     /*
     |--------------------------------------------------------------------------

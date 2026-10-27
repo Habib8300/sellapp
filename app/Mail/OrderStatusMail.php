@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Order;
+use App\Models\Setting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -18,7 +19,8 @@ class OrderStatusMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Dhakebir Jersey House — '.$this->order->order_number.' update',
+            subject: (Setting::query()->where('key', 'brand_name')->value('value') ?: 'DCU Jersey House')
+                .' — '.$this->order->order_number.' update',
         );
     }
 

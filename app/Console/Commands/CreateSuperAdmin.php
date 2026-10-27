@@ -9,7 +9,7 @@ use Illuminate\Validation\Rules\Password;
 
 class CreateSuperAdmin extends Command
 {
-    protected $signature = 'app:create-super-admin {--name= : Administrator name} {--email= : Administrator email address}';
+    protected $signature = 'app:create-super-admin {--name= : Administrator name} {--email= : Administrator email address} {--password= : Administrator password}';
 
     protected $description = 'Create the first store administrator using an interactive password prompt';
 
@@ -17,8 +17,8 @@ class CreateSuperAdmin extends Command
     {
         $name = $this->option('name') ?: $this->ask('Administrator name');
         $email = $this->option('email') ?: $this->ask('Administrator email');
-        $password = $this->secret('Administrator password');
-        $passwordConfirmation = $this->secret('Confirm administrator password');
+        $password = $this->option('password') ?: $this->secret('Administrator password');
+        $passwordConfirmation = $this->option('password') ? $this->option('password') : $this->secret('Confirm administrator password');
 
         $validator = Validator::make([
             'name' => $name,

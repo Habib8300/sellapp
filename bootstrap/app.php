@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: env('TRUSTED_PROXIES', '*'));
         $middleware->appendToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\StorefrontMaintenance::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\StorefrontCacheHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

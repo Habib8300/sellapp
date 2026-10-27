@@ -48,7 +48,9 @@ class BlogPostResource extends Resource
                 FileUpload::make('cover_image')->image()->disk('public')->directory('blog')->visibility('public'),
                 TextInput::make('meta_title')->maxLength(255),
                 TextInput::make('meta_description')->maxLength(320),
-                DateTimePicker::make('published_at')->native(false),
+                DateTimePicker::make('published_at')
+                    ->native(false)
+                    ->helperText('Leave blank to publish immediately when “Published” is enabled. Set a future date to schedule publication.'),
                 Toggle::make('is_published')->default(false),
             ])->columns(2),
         ]);

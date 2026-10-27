@@ -1,4 +1,4 @@
-<article class="group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-slate-900">
+<article class="jersey-glass-card group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-slate-900">
     <a href="{{ route('catalog.show', ['slug' => $product->slug], absolute: false) }}" class="relative block aspect-[4/3] overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-amber-950">
         @if ($product->images->isNotEmpty())
             <img src="/storage/{{ ltrim($product->images->first()->image_path, '/') }}" alt="{{ $product->images->first()->alt_text ?: $product->name }}" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">

@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Banner;
+use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Collection;
+use App\Models\HomeHeroSlide;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Setting;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -16,11 +19,17 @@ class StorefrontController extends Controller
     public function home(): View
     {
         return view('storefront', [
+            'heroSlides' => HomeHeroSlide::query()
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get(),
             'banners' => Banner::query()
                 ->where('is_active', true)
                 ->where(fn (Builder $query) => $query->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
                 ->where(fn (Builder $query) => $query->whereNull('ends_at')->orWhere('ends_at', '>=', now()))
                 ->orderBy('sort_order')
+                ->orderBy('id')
                 ->limit(5)
                 ->get(),
             'categories' => Category::query()
@@ -38,6 +47,12 @@ class StorefrontController extends Controller
                 ->latest()
                 ->limit(8)
                 ->get(),
+            'blogPosts' => BlogPost::query()
+                ->where('is_published', true)
+                ->where(fn (Builder $query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
+                ->orderByRaw('COALESCE(published_at, created_at) DESC')
+                ->limit(3)
+                ->get(),
         ]);
     }
 
@@ -47,11 +62,11 @@ class StorefrontController extends Controller
             'q' => ['nullable', 'string', 'max:100'],
             'category' => ['nullable', 'string', 'exists:categories,slug'],
             'collection' => ['nullable', 'string', 'exists:collections,slug'],
-            'size' => ['nullable', 'string', 'max:20'],
+            'size' => ['nullable', 'string', 'max:20', 'in:XS,S,M,L,XL,XXL,3XL,Kids'],
             'color' => ['nullable', 'string', 'max:60'],
             'min_price' => ['nullable', 'numeric', 'min:0'],
             'max_price' => ['nullable', 'numeric', 'min:0'],
-            'availability' => ['nullable', 'in:in_stock,preorder'],
+            'availability' => ['nullable', 'in:in_stock,out_of_stock,low_stock,preorder'],
             'sort' => ['nullable', 'in:latest,price_asc,price_desc'],
         ]);
 
@@ -78,22 +93,49 @@ class StorefrontController extends Controller
             $query->whereHas('collections', fn (Builder $collection) => $collection->where('slug', $filters['collection']));
         }
 
-        if (filled($filters['size'] ?? null) || filled($filters['color'] ?? null)) {
-            $query->whereHas('variants', function (Builder $variant) use ($filters): void {
+        $hasVariantFilters = filled($filters['size'] ?? null)
+            || filled($filters['color'] ?? null)
+            || in_array($filters['availability'] ?? null, ['in_stock', 'low_stock', 'out_of_stock'], true);
+
+        if ($hasVariantFilters) {
+            $matchingVariants = function (Builder $variant) use ($filters): void {
                 $variant->where('is_active', true)
                     ->when(filled($filters['size'] ?? null), fn (Builder $variant) => $variant->where('size', $filters['size']))
-                    ->when(filled($filters['color'] ?? null), fn (Builder $variant) => $variant->where('color', $filters['color']));
-            });
+                    ->when(filled($filters['color'] ?? null), fn (Builder $variant) => $variant
+                        ->whereRaw('LOWER(color) = ?', [mb_strtolower(trim($filters['color']))]));
+            };
+
+            if (($filters['availability'] ?? null) === 'out_of_stock') {
+                if (filled($filters['size'] ?? null) || filled($filters['color'] ?? null)) {
+                    $query->whereHas('variants', $matchingVariants)
+                        ->whereDoesntHave('variants', function (Builder $variant) use ($matchingVariants): void {
+                            $matchingVariants($variant);
+                            $variant->where('stock_quantity', '>', 0);
+                        });
+                } else {
+                    $query->whereDoesntHave('variants', fn (Builder $variant) => $variant
+                        ->where('is_active', true)
+                        ->where('stock_quantity', '>', 0));
+                }
+            } else {
+                $query->whereHas('variants', function (Builder $variant) use ($filters, $matchingVariants): void {
+                    $matchingVariants($variant);
+
+                    if (($filters['availability'] ?? null) === 'in_stock') {
+                        $variant->where('stock_quantity', '>', 0);
+                    } elseif (($filters['availability'] ?? null) === 'low_stock') {
+                        $variant->where('stock_quantity', '>', 0)
+                            ->whereColumn('stock_quantity', '<=', 'low_stock_threshold');
+                    }
+                });
+            }
         }
 
-        $query->when(isset($filters['min_price']), fn (Builder $query) => $query->where('price', '>=', $filters['min_price']))
+        $query->when(isset($filters['min_price']), fn (Builder $query) => $query
+            ->where('price', '>=', $filters['min_price']))
             ->when(isset($filters['max_price']), fn (Builder $query) => $query->where('price', '<=', $filters['max_price']));
 
-        if (($filters['availability'] ?? null) === 'in_stock') {
-            $query->whereHas('variants', fn (Builder $variant) => $variant
-                ->where('is_active', true)
-                ->where('stock_quantity', '>', 0));
-        } elseif (($filters['availability'] ?? null) === 'preorder') {
+        if (($filters['availability'] ?? null) === 'preorder') {
             $query->where('is_preorder', true)
                 ->where(fn (Builder $query) => $query
                     ->whereNull('preorder_close_at')
@@ -110,6 +152,19 @@ class StorefrontController extends Controller
             'products' => $query->paginate(12)->withQueryString(),
             'categories' => Category::query()->where('is_active', true)->orderBy('sort_order')->get(),
             'collections' => Collection::query()->where('is_active', true)->orderBy('name')->get(),
+            'colors' => ProductVariant::query()
+                ->where('is_active', true)
+                ->whereHas('product', fn (Builder $product) => $product
+                    ->where('is_active', true)
+                    ->whereHas('category', fn (Builder $category) => $category->where('is_active', true)))
+                ->select('color')
+                ->distinct()
+                ->orderBy('color')
+                ->pluck('color'),
+            'priceRange' => [
+                'min' => (float) $this->publishedProducts()->min('price'),
+                'max' => (float) $this->publishedProducts()->max('price'),
+            ],
             'filters' => $filters,
         ]);
     }

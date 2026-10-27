@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             SuperAdminSeeder::class,
             CatalogSeeder::class,
+            HomeHeroSlideSeeder::class,
             CmsPageSeeder::class,
         ]);
     }

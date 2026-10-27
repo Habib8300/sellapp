@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\DashboardOperations;
+use App\Filament\Widgets\DashboardStatsOverview;
+use App\Filament\Widgets\DashboardWelcome;
 use App\Models\Setting;
 use Filament\FontProviders\GoogleFontProvider;
 use Filament\Http\Middleware\Authenticate;
@@ -31,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->font('Hind Siliguri', provider: GoogleFontProvider::class)
             ->brandName(fn (): string => (string) (
                 Setting::query()->where('key', 'brand_name')->value('value')
-                ?: 'Dhakebir Jersey House'
+                ?: 'DCU Jersey House'
             ))
             ->login()
             ->registration(false)
@@ -47,6 +50,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                DashboardWelcome::class,
+                DashboardStatsOverview::class,
+                DashboardOperations::class,
                 AccountWidget::class,
             ])
             ->middleware([

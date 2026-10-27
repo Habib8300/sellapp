@@ -5,7 +5,7 @@
 @section('content')
     <section class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
         <div class="rounded-3xl border border-emerald-400/20 bg-slate-900 p-6 sm:p-10">
-            <p class="text-sm font-semibold uppercase tracking-wider text-emerald-300">Dhakebir Jersey House</p>
+            <p class="text-sm font-semibold uppercase tracking-wider text-emerald-300">{{ $brandName }}</p>
             <h1 class="mt-3 text-3xl font-black">অর্ডার গ্রহণ করা হয়েছে</h1>
             <p class="mt-3 text-slate-300">আপনার অর্ডার নম্বর <strong class="text-white">{{ $order->order_number }}</strong>। অর্ডারের আপডেটের জন্য এই নম্বরটি সংরক্ষণ করুন।</p>
             <div class="mt-6 space-y-3 rounded-2xl bg-slate-950 p-5">
