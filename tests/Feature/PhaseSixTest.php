@@ -252,6 +252,8 @@ it('renders mobile navigation and compact catalog controls accessibly', function
         ->assertSee('bg-[#771115] px-3 text-sm font-semibold text-white', false)
         ->assertSee('rounded-l-3xl border border-r-0 border-white/70 bg-white/75', false)
         ->assertSee('backdrop-blur-2xl', false)
+        ->assertSee('মোবাইল নেভিগেশন', false)
+        ->assertSee('<svg aria-hidden="true"', false)
         ->assertSee('rounded-2xl border border-white/70 bg-white/75', false)
         ->assertSee('backdrop-blur-xl', false)
         ->assertSee('role="search"', false)

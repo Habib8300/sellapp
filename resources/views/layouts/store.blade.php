@@ -24,12 +24,13 @@
                 <span class="text-[#5d0d11]">ঢাকেবির</span> জার্সি হাউজ
             </a>
             <button x-ref="sidebarTrigger" type="button" class="mobile-menu-button inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-[#4285f4] bg-[#4285f4] text-xl text-white shadow-sm transition hover:bg-[#326fd3] focus-visible:outline-[#4285f4] sm:hidden" @click="menuOpen = true; $nextTick(() => $refs.sidebarClose.focus())" :aria-expanded="menuOpen.toString()" aria-controls="mobile-store-sidebar" aria-label="সাইডবার মেনু খুলুন">
-                    <span aria-hidden="true">☰</span>
+                <svg x-show="!menuOpen" aria-hidden="true" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <svg x-show="menuOpen" x-cloak aria-hidden="true" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m18 6-12 12M6 6l12 12"/></svg>
             </button>
             <form role="search" action="{{ route('catalog.index', absolute: false) }}" method="GET" class="hidden sm:flex sm:w-auto sm:max-w-xs">
                     <label class="sr-only" for="store-search">পণ্য খুঁজুন</label>
                     <input id="store-search" name="q" value="{{ request('q') }}" placeholder="জার্সি খুঁজুন..." class="min-w-0 w-full rounded-l-lg border-0 bg-gray-100 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-[#f7941d]">
-                    <button class="nav-search-button min-h-11 shrink-0 rounded-r-lg bg-[#f7941d] px-4 text-sm font-semibold text-white hover:bg-[#e8840c]">খুঁজুন</button>
+                    <button class="nav-search-button inline-flex min-h-11 shrink-0 items-center gap-2 rounded-r-lg bg-[#f7941d] px-4 text-sm font-semibold text-white hover:bg-[#e8840c]"><svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>খুঁজুন</button>
             </form>
             <nav class="hidden items-center gap-4 text-sm sm:flex">
                     <a href="{{ route('catalog.index', absolute: false) }}" class="text-gray-700 hover:text-[#771115]">শপ</a>
@@ -44,7 +45,8 @@
                     @endguest
             </nav>
             <a href="{{ route('cart.index', absolute: false) }}" aria-label="কার্ট, {{ count(session('cart', [])) }}টি পণ্য" class="nav-cart-button hidden min-h-11 shrink-0 items-center rounded-lg bg-[#771115] px-3 text-sm font-semibold text-white hover:bg-[#5d0d11] sm:inline-flex">
-                    কার্ট <span class="ml-1 rounded-full bg-[#771115] px-2 py-0.5 text-xs text-white">{{ count(session('cart', [])) }}</span>
+                <svg aria-hidden="true" class="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l2.2 11.1a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 7H6"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+                কার্ট <span class="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs text-white">{{ count(session('cart', [])) }}</span>
             </a>
         </div>
     </header>
@@ -58,23 +60,23 @@
         <form role="search" action="{{ route('catalog.index', absolute: false) }}" method="GET" class="mt-5 flex">
             <label class="sr-only" for="mobile-store-search">পণ্য খুঁজুন</label>
             <input id="mobile-store-search" name="q" value="{{ request('q') }}" placeholder="জার্সি খুঁজুন..." class="min-w-0 w-full rounded-l-lg border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-500 focus:border-[#f7941d] focus:ring-[#f7941d]">
-            <button class="nav-search-button min-h-11 shrink-0 rounded-r-lg bg-[#f7941d] px-4 text-sm font-semibold text-white">খুঁজুন</button>
+            <button class="nav-search-button inline-flex min-h-11 shrink-0 items-center gap-2 rounded-r-lg bg-[#f7941d] px-4 text-sm font-semibold text-white"><svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>খুঁজুন</button>
         </form>
         <a href="{{ route('cart.index', absolute: false) }}" class="nav-cart-button mt-4 flex min-h-12 items-center justify-between rounded-xl bg-[#771115] px-4 font-semibold text-white" @click="menuOpen = false">
-            <span>আমার কার্ট</span><span class="rounded-full bg-white/20 px-2 py-1 text-sm">{{ count(session('cart', [])) }}টি</span>
+            <span class="inline-flex items-center gap-3"><svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l2.2 11.1a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 7H6"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>আমার কার্ট</span><span class="rounded-full bg-white/20 px-2 py-1 text-sm">{{ count(session('cart', [])) }}টি</span>
         </a>
         <nav class="mt-4 flex flex-col gap-1 text-base" aria-label="মোবাইল নেভিগেশন">
-            <a href="{{ route('catalog.index', absolute: false) }}" class="flex min-h-12 items-center rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false">সব জার্সি</a>
-            <a href="{{ route('team-orders.create', absolute: false) }}" class="flex min-h-12 items-center rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false">টিম অর্ডার</a>
-            <a href="{{ route('blog.index', absolute: false) }}" class="flex min-h-12 items-center rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false">ব্লগ</a>
-            <a href="{{ route('wishlist.index', absolute: false) }}" class="flex min-h-12 items-center justify-between rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false"><span>উইশলিস্ট</span><span>{{ count(session('wishlist', [])) }}</span></a>
-            <a href="{{ route('orders.track', absolute: false) }}" class="flex min-h-12 items-center rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false">অর্ডার ট্র্যাক</a>
-            <a href="{{ route('quotes.create', absolute: false) }}" class="flex min-h-12 items-center rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false">বাল্ক অর্ডারের কোট</a>
+            <a href="{{ route('catalog.index', absolute: false) }}" class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false"><svg aria-hidden="true" class="h-5 w-5 text-[#771115]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4zM8 5v14m8-14v14M4 10h16m-16 4h16"/></svg>সব জার্সি</a>
+            <a href="{{ route('team-orders.create', absolute: false) }}" class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false"><svg aria-hidden="true" class="h-5 w-5 text-[#771115]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c0-3 2.5-5 6-5s6 2 6 5m1-4c3 0 5 1.5 5 4"/></svg>টিম অর্ডার</a>
+            <a href="{{ route('blog.index', absolute: false) }}" class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false"><svg aria-hidden="true" class="h-5 w-5 text-[#771115]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5zM8 8h8m-8 4h8m-8 4h5"/></svg>ব্লগ</a>
+            <a href="{{ route('wishlist.index', absolute: false) }}" class="flex min-h-12 items-center justify-between rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false"><span class="inline-flex items-center gap-3"><svg aria-hidden="true" class="h-5 w-5 text-[#771115]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 5.2-8.8 10.2-8.8 10.2S3.2 13.8 3.2 8.6A4.6 4.6 0 0 1 12 6a4.6 4.6 0 0 1 8.8 2.6Z"/></svg>উইশলিস্ট</span><span class="rounded-full bg-gray-100 px-2 py-0.5 text-sm">{{ count(session('wishlist', [])) }}</span></a>
+            <a href="{{ route('orders.track', absolute: false) }}" class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false"><svg aria-hidden="true" class="h-5 w-5 text-[#771115]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4M11 7v4l2.5 1.5"/></svg>অর্ডার ট্র্যাক</a>
+            <a href="{{ route('quotes.create', absolute: false) }}" class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false"><svg aria-hidden="true" class="h-5 w-5 text-[#771115]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4zM8 9h8m-8 4h5"/></svg>বাল্ক অর্ডারের কোট</a>
             @guest
-                    <a href="{{ route('login', absolute: false) }}" class="flex min-h-12 items-center rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false">লগ ইন</a>
-                    <a href="{{ route('register', absolute: false) }}" class="mt-2 flex min-h-12 items-center justify-center rounded-lg bg-[#f7941d] px-3 font-semibold text-gray-950" @click="menuOpen = false">অ্যাকাউন্ট খুলুন</a>
+                    <a href="{{ route('login', absolute: false) }}" class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false"><svg aria-hidden="true" class="h-5 w-5 text-[#771115]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c.5-3.5 3-5 7-5s6.5 1.5 7 5"/></svg>লগ ইন</a>
+                    <a href="{{ route('register', absolute: false) }}" class="mt-2 flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#f7941d] px-3 font-semibold text-gray-950" @click="menuOpen = false"><svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 20c.5-3.5 3-5 7-5m10-1v8m-4-4h8"/></svg>অ্যাকাউন্ট খুলুন</a>
             @else
-                    <a href="{{ route('dashboard', absolute: false) }}" class="flex min-h-12 items-center rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false">আমার অ্যাকাউন্ট</a>
+                    <a href="{{ route('dashboard', absolute: false) }}" class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-gray-800 hover:bg-gray-100" @click="menuOpen = false"><svg aria-hidden="true" class="h-5 w-5 text-[#771115]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c.5-3.5 3-5 7-5s6.5 1.5 7 5"/></svg>আমার অ্যাকাউন্ট</a>
             @endguest
         </nav>
         <div class="mt-auto border-t border-gray-200 pt-4">
