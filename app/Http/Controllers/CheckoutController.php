@@ -37,9 +37,15 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->withErrors(['cart' => 'কার্টের পণ্য আর পাওয়া যাচ্ছে না।']);
         }
 
+        $defaultAddress = $request->user()?->addresses()
+            ->with('campus')
+            ->where('is_default', true)
+            ->first();
+
         return view('checkout.create', [
             'items' => $cart['items'],
             'subtotal' => $cart['subtotal'],
+            'defaultAddress' => $defaultAddress,
             'divisions' => Division::query()->orderBy('name')->get(),
             'deliveryInsideDhaka' => (float) (Setting::query()->where('key', 'delivery_inside_dhaka')->value('value') ?: 70),
             'deliveryOutsideDhaka' => (float) (Setting::query()->where('key', 'delivery_outside_dhaka')->value('value') ?: 130),

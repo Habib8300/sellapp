@@ -1,10 +1,12 @@
 <?php
 
+use App\Models\Address;
 use App\Models\District;
 use App\Models\Division;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\User;
 use App\Models\Upazila;
 use Database\Seeders\BangladeshLocationSeeder;
 use Database\Seeders\CatalogSeeder;
@@ -39,6 +41,41 @@ function deliveryDetails(District $district): array
         'delivery_address' => 'House 10, Road 2',
     ];
 }
+
+it('prefills a signed-in customer checkout with their default address and contact information', function (): void {
+    $customer = User::factory()->create([
+        'name' => 'Account Name',
+        'email' => 'account@example.com',
+        'phone' => '01700000000',
+    ]);
+    $variant = ProductVariant::query()->firstOrFail();
+    addCheckoutVariant($variant);
+
+    $district = District::query()->where('name', 'Dhaka')->firstOrFail();
+    $upazila = Upazila::query()->where('district_id', $district->id)->firstOrFail();
+    Address::query()->create([
+        'user_id' => $customer->id,
+        'label' => 'Campus',
+        'recipient_name' => 'Saved Recipient',
+        'phone' => '01812345678',
+        'division_id' => $district->division_id,
+        'district_id' => $district->id,
+        'upazila_id' => $upazila->id,
+        'locality' => 'University Campus',
+        'address' => 'Building 5, Road 2',
+        'is_default' => true,
+    ]);
+
+    $response = $this->actingAs($customer)->get('/checkout')->assertOk()
+        ->assertSee('value="Saved Recipient"', false)
+        ->assertSee('value="01812345678"', false)
+        ->assertSee('value="account@example.com"', false)
+        ->assertSee('University Campus, Building 5, Road 2')
+        ->assertSee('আপনার ডিফল্ট ঠিকানা থেকে তথ্য পূরণ করা হয়েছে।');
+    $response->assertSee('division: '.$district->division_id, false)
+        ->assertSee('district: '.$district->id, false)
+        ->assertSee('upazila: '.$upazila->id, false);
+});
 
 it('places a guest delivery order with customization and creates a downloadable invoice', function (): void {
     $product = Product::where('slug', 'campus-football-jersey')->firstOrFail();
@@ -183,9 +220,16 @@ it('loads dependent Bangladesh checkout locations and requires valid checkout da
     $this->get("/locations/divisions/{$division->id}/districts")
         ->assertOk()
         ->assertJsonFragment(['id' => $district->id]);
+    $city = Upazila::query()->where('district_id', $district->id)->where('location_type', 'city')->firstOrFail();
     $this->get("/locations/districts/{$district->id}/upazilas")
         ->assertOk()
-        ->assertJsonFragment(['id' => Upazila::query()->where('district_id', $district->id)->firstOrFail()->id]);
+        ->assertJsonFragment(['id' => Upazila::query()->where('district_id', $district->id)->where('location_type', 'upazila')->firstOrFail()->id])
+        ->assertJsonFragment([
+            'id' => $city->id,
+            'name' => $city->name,
+            'name_bn' => $city->name_bn,
+            'location_type' => 'city',
+        ]);
 
     $this->post('/checkout', [
         'customer_name' => 'Buyer',

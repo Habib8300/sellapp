@@ -65,7 +65,7 @@
             <a href="{{ route('home', absolute: false) }}" aria-label="DCU Jersey House হোম" class="mr-auto min-w-0 text-base font-bold tracking-tight sm:text-lg">
                 <span class="text-[#5d0d11]">ঢাকেবির</span> জার্সি হাউজ
             </a>
-            <button x-ref="sidebarTrigger" type="button" class="mobile-menu-button inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-[#4285f4] bg-[#4285f4] text-xl text-white shadow-sm transition hover:bg-[#326fd3] focus-visible:outline-[#4285f4] sm:hidden" @click="menuOpen = true; $nextTick(() => $refs.sidebarClose.focus())" :aria-expanded="menuOpen.toString()" aria-controls="mobile-store-sidebar" aria-label="সাইডবার মেনু খুলুন">
+            <button x-ref="sidebarTrigger" type="button" class="mobile-menu-button inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-xl text-[#771115] transition focus-visible:outline-[#771115] sm:hidden" @click.stop="menuOpen = true; $nextTick(() => $refs.sidebarClose.focus())" :aria-expanded="menuOpen.toString()" aria-controls="mobile-store-sidebar" aria-label="সাইডবার মেনু খুলুন">
                 <svg x-show="!menuOpen" aria-hidden="true" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
                 <svg x-show="menuOpen" x-cloak aria-hidden="true" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m18 6-12 12M6 6l12 12"/></svg>
             </button>

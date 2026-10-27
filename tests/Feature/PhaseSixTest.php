@@ -4,6 +4,7 @@ use App\Jobs\SendOrderStatusEmail;
 use App\Jobs\SendOrderStatusSms;
 use App\Mail\OrderStatusMail;
 use App\Models\Address;
+use App\Models\Campus;
 use App\Models\Banner;
 use App\Models\BlogPost;
 use App\Models\CmsPage;
@@ -78,6 +79,7 @@ it('isolates account data and saves only location-consistent customer addresses'
         'division_id' => $district->division_id,
         'district_id' => $district->id,
         'upazila_id' => $upazila->id,
+        'locality' => 'University Campus, Dhanmondi',
         'address' => 'House 10, Road 2',
         'is_default' => 1,
     ];
@@ -86,6 +88,36 @@ it('isolates account data and saves only location-consistent customer addresses'
     $address = Address::query()->sole();
     expect($address->is_default)->toBeTrue();
 
+    $this->post('/addresses', [...$addressData, 'label' => 'Office', 'is_default' => 0])->assertRedirect();
+    $officeAddress = Address::query()->where('label', 'Office')->sole();
+    $this->post("/addresses/{$officeAddress->id}/default")->assertRedirect();
+    $this->assertDatabaseHas('addresses', ['id' => $address->id, 'is_default' => false]);
+    $this->assertDatabaseHas('addresses', ['id' => $officeAddress->id, 'is_default' => true]);
+    $this->put("/addresses/{$officeAddress->id}", [...$addressData, 'label' => 'Updated Office'])
+        ->assertRedirect();
+    $this->assertDatabaseHas('addresses', ['id' => $officeAddress->id, 'label' => 'Updated Office', 'is_default' => true]);
+
+    $campus = Campus::query()->create([
+        'division_id' => $district->division_id,
+        'district_id' => $district->id,
+        'upazila_id' => $upazila->id,
+        'name' => 'Dhaka University',
+        'name_bn' => 'ঢাকা বিশ্ববিদ্যালয়',
+        'slug' => 'dhaka-university',
+        'is_active' => true,
+    ]);
+    $this->put("/addresses/{$officeAddress->id}", [
+        ...$addressData,
+        'label' => 'Campus',
+        'campus_id' => $campus->id,
+        'locality' => '',
+    ])->assertRedirect();
+    $this->assertDatabaseHas('addresses', ['id' => $officeAddress->id, 'campus_id' => $campus->id]);
+    $this->get('/dashboard')
+        ->assertOk()
+        ->assertSee('ঢাকা বিশ্ববিদ্যালয়')
+        ->assertSee('University Campus, Dhanmondi');
+
     $mismatchedDistrict = District::query()->where('division_id', '!=', $district->division_id)->firstOrFail();
     $this->from('/dashboard')->post('/addresses', [...$addressData, 'district_id' => $mismatchedDistrict->id])
         ->assertRedirect('/dashboard')->assertSessionHasErrors('district_id');
@@ -93,6 +125,65 @@ it('isolates account data and saves only location-consistent customer addresses'
     $this->actingAs($other)->get('/dashboard')->assertOk()->assertDontSee($order->order_number);
     $this->delete("/addresses/{$address->id}")->assertNotFound();
     $this->assertDatabaseHas('addresses', ['id' => $address->id, 'user_id' => $owner->id]);
+});
+
+it('gathers customer orders, wishlist, profile, student verification, and return actions in the account', function (): void {
+    $buyer = User::factory()->create();
+    $buyer->assignRole('customer');
+    $product = Product::query()->where('slug', 'campus-football-jersey')->firstOrFail();
+    $order = createPhaseSixOrder($buyer);
+    markPhaseSixOrderDelivered($order);
+    $item = $order->items()->sole();
+    $order->statusHistory()->create([
+        'status' => 'confirmed',
+        'created_at' => now(),
+    ]);
+    $order->payments()->create([
+        'provider' => 'bkash',
+        'status' => 'pending',
+        'amount' => 100,
+        'transaction_reference' => 'TXN-ACCOUNT-1',
+    ]);
+
+    $this->actingAs($buyer)
+        ->withSession(['wishlist' => [$product->id]])
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSee($order->order_number)
+        ->assertSee($product->name_bn)
+        ->assertSee(route('logout', absolute: false), false)
+        ->assertSee('লগ আউট')
+        ->assertSee(route('profile.edit', absolute: false), false)
+        ->assertSee(route('student-verification.create', absolute: false), false)
+        ->assertSee(route('orders.track', absolute: false), false)
+        ->assertSee(route('returns.store', ['orderItem' => $item->id], absolute: false), false)
+        ->assertSee('অর্ডারের অগ্রগতি')
+        ->assertSee('Confirmed')
+        ->assertSee('TXN-ACCOUNT-1')
+        ->assertSee('মোট অর্ডার')
+        ->assertSee('চলমান অর্ডার')
+        ->assertSee('আবার কিনুন')
+        ->assertSee('account-orders', false)
+        ->assertSee('account-wishlist', false)
+        ->assertSee('account-addresses', false);
+
+    $this->get('/profile')->assertOk()->assertSee(route('logout', absolute: false), false)->assertSee('লগ আউট');
+    $this->post('/logout')->assertRedirect('/');
+    $this->assertGuest();
+});
+
+it('reorders only the signed-in customer’s available purchased variants', function (): void {
+    $buyer = User::factory()->create();
+    $buyer->assignRole('customer');
+    $other = User::factory()->create();
+    $other->assignRole('customer');
+    $order = createPhaseSixOrder($buyer);
+
+    $this->actingAs($other)->post("/orders/{$order->id}/reorder")->assertNotFound();
+
+    $response = $this->actingAs($buyer)->post("/orders/{$order->id}/reorder");
+    $response->assertRedirect('/cart')->assertSessionHas('status');
+    $this->get('/cart')->assertOk()->assertSee('ক্যাম্পাস ফুটবল জার্সি');
 });
 
 it('accepts delivered-purchase reviews and exchange requests only within the policy window', function (): void {
@@ -174,7 +265,8 @@ it('publishes CMS content, exposes sitemap URLs, and renders staff-managed shipm
         ->assertDontSee('Fresh designs')
         ->assertSee('home-banners', false)
         ->assertSee('home-banner-card', false)
-        ->assertSee('window.setInterval(() => this.next(), 10000)', false)
+        ->assertSee('home-banners__grid', false)
+        ->assertSee('window.setInterval(() => this.next(), 5000)', false)
         ->assertSee($post->title)
         ->assertSee('home-blog', false);
     expect(strpos($homeResponse->getContent(), $post->title))
@@ -289,8 +381,8 @@ it('renders mobile navigation and compact catalog controls accessibly', function
         ->assertSee('aria-controls="mobile-store-sidebar"', false)
         ->assertSee('id="mobile-store-sidebar"', false)
         ->assertSee('mobile-menu-button', false)
-        ->assertSee('text-white', false)
-        ->assertSee('bg-[#4285f4]', false)
+        ->assertSee('@click.stop="menuOpen = true', false)
+        ->assertSee('text-[#771115]', false)
         ->assertSee('nav-cart-button', false)
         ->assertSee('nav-search-button', false)
         ->assertSee('bg-[#771115] px-3 text-sm font-semibold text-white', false)
@@ -304,7 +396,7 @@ it('renders mobile navigation and compact catalog controls accessibly', function
         ->assertSee('grid-cols-2', false);
 
     $this->get('/products')->assertOk()
-        ->assertSee('<details class="group">', false)
-        ->assertSee('lg:!block', false)
+        ->assertSee('filter-glass-card', false)
+        ->assertSee('name="category"', false)
         ->assertSee('grid-cols-2', false);
 });

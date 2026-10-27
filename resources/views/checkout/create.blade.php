@@ -17,10 +17,15 @@
                 <section class="rounded-2xl border border-white/10 bg-slate-900 p-5 sm:p-6">
                     <h2 class="text-xl font-bold">যোগাযোগের তথ্য</h2>
                     <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                        <div class="sm:col-span-2"><label for="customer-name" class="text-sm text-slate-300">আপনার নাম *</label><input id="customer-name" name="customer_name" value="{{ old('customer_name', auth()->user()?->name) }}" required maxlength="150" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"></div>
-                        <div><label for="customer-phone" class="text-sm text-slate-300">মোবাইল নম্বর *</label><input id="customer-phone" name="customer_phone" value="{{ old('customer_phone') }}" required placeholder="01XXXXXXXXX" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"></div>
+                        <div class="sm:col-span-2"><label for="customer-name" class="text-sm text-slate-300">আপনার নাম *</label><input id="customer-name" name="customer_name" value="{{ old('customer_name', $defaultAddress?->recipient_name ?: auth()->user()?->name) }}" required maxlength="150" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"></div>
+                        <div><label for="customer-phone" class="text-sm text-slate-300">মোবাইল নম্বর *</label><input id="customer-phone" name="customer_phone" value="{{ old('customer_phone', $defaultAddress?->phone ?: auth()->user()?->phone) }}" required placeholder="01XXXXXXXXX" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"></div>
                         <div><label for="customer-email" class="text-sm text-slate-300">ইমেইল (ঐচ্ছিক)</label><input id="customer-email" type="email" name="customer_email" value="{{ old('customer_email', auth()->user()?->email) }}" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"></div>
                     </div>
+                    @if ($defaultAddress)
+                        <p class="mt-3 text-sm text-emerald-300">আপনার ডিফল্ট ঠিকানা থেকে তথ্য পূরণ করা হয়েছে। অর্ডার দেওয়ার আগে চাইলে পরিবর্তন করুন।</p>
+                    @elseif (auth()->check())
+                        <p class="mt-3 text-sm text-slate-400">চেকআউট দ্রুত করতে অ্যাকাউন্টে একটি ডিফল্ট ঠিকানা সংরক্ষণ করুন।</p>
+                    @endif
                 </section>
 
                 <section class="rounded-2xl border border-white/10 bg-slate-900 p-5 sm:p-6">
@@ -38,15 +43,15 @@
 
                     <div x-show="fulfillment === 'delivery'" x-cloak class="mt-5 grid gap-4 sm:grid-cols-2">
                         <p x-show="locationError" x-text="locationError" role="alert" class="sm:col-span-2 text-sm text-rose-300"></p>
-                        <div><label for="division-id" class="text-sm text-slate-300">বিভাগ *</label><select id="division-id" name="division_id" x-model="division" @change="loadDistricts()" :required="fulfillment === 'delivery'" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"><option value="">বিভাগ নির্বাচন</option>@foreach ($divisions as $division)<option value="{{ $division->id }}" @selected((string) old('division_id') === (string) $division->id)>{{ $division->name_bn ?: $division->name }}</option>@endforeach</select></div>
+                        <div><label for="division-id" class="text-sm text-slate-300">বিভাগ *</label><select id="division-id" name="division_id" x-model="division" @change="loadDistricts()" :required="fulfillment === 'delivery'" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"><option value="">বিভাগ নির্বাচন</option>@foreach ($divisions as $division)<option value="{{ $division->id }}" @selected((string) old('division_id', $defaultAddress?->division_id) === (string) $division->id)>{{ $division->name_bn ?: $division->name }}</option>@endforeach</select></div>
                         <div><label for="district-id" class="text-sm text-slate-300">জেলা *</label><select id="district-id" name="district_id" x-model="district" @change="loadUpazilas()" :required="fulfillment === 'delivery'" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"><option value="">আগে বিভাগ নির্বাচন করুন</option><template x-for="item in districts" :key="item.id"><option :value="item.id" x-text="item.name_bn || item.name"></option></template></select></div>
                         <div><label for="upazila-id" class="text-sm text-slate-300">উপজেলা *</label><select id="upazila-id" name="upazila_id" x-model="upazila" :required="fulfillment === 'delivery'" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white"><option value="">আগে জেলা নির্বাচন করুন</option><template x-for="item in upazilas" :key="item.id"><option :value="item.id" x-text="item.name_bn || item.name"></option></template></select></div>
-                        <div class="sm:col-span-2"><label for="delivery-address" class="text-sm text-slate-300">বিস্তারিত ঠিকানা *</label><textarea id="delivery-address" name="delivery_address" rows="3" maxlength="500" :required="fulfillment === 'delivery'" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">{{ old('delivery_address') }}</textarea></div>
+                        <div class="sm:col-span-2"><label for="delivery-address" class="text-sm text-slate-300">বিস্তারিত ঠিকানা *</label><textarea id="delivery-address" name="delivery_address" rows="3" maxlength="500" :required="fulfillment === 'delivery'" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">{{ old('delivery_address', trim(implode(', ', array_filter([$defaultAddress?->campus?->name_bn ?: $defaultAddress?->campus?->name, $defaultAddress?->locality, $defaultAddress?->address])))) }}</textarea></div>
                     </div>
 
                     <div x-show="fulfillment === 'campus_pickup'" x-cloak class="mt-5">
                         <label for="pickup-point" class="text-sm text-slate-300">পিকআপ ক্যাম্পাস / স্থান *</label>
-                        <input id="pickup-point" name="pickup_point" value="{{ old('pickup_point') }}" maxlength="180" :required="fulfillment === 'campus_pickup'" placeholder="যেমন: ঢাকা বিশ্ববিদ্যালয়, টিএসসি" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">
+                        <input id="pickup-point" name="pickup_point" value="{{ old('pickup_point', trim(implode(', ', array_filter([$defaultAddress?->campus?->name_bn ?: $defaultAddress?->campus?->name, $defaultAddress?->locality])))) }}" maxlength="180" :required="fulfillment === 'campus_pickup'" placeholder="যেমন: ঢাকা বিশ্ববিদ্যালয়, টিএসসি" class="mt-1 w-full rounded-lg border-white/10 bg-slate-950 text-white">
                         <p class="mt-2 text-xs text-slate-400">পিকআপের সময় ও স্থান নিশ্চিত করতে আমাদের টিম আপনার সাথে যোগাযোগ করবে।</p>
                     </div>
                 </section>
@@ -148,9 +153,9 @@
                     }
                     return discount;
                 },
-                division: @js(old('division_id', '')),
-                district: @js(old('district_id', '')),
-                upazila: @js(old('upazila_id', '')),
+                division: @js(old('division_id', $defaultAddress?->division_id ?? '')),
+                district: @js(old('district_id', $defaultAddress?->district_id ?? '')),
+                upazila: @js(old('upazila_id', $defaultAddress?->upazila_id ?? '')),
                 districts: [],
                 upazilas: [],
                 locationError: '',
@@ -161,7 +166,7 @@
                 money(value) {
                     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
                 },
-                async loadDistricts() {
+                async loadDistricts(selectedDistrict = '') {
                     this.locationError = '';
                     this.district = '';
                     this.upazila = '';
@@ -174,8 +179,9 @@
                         return;
                     }
                     this.districts = await response.json();
+                    this.district = selectedDistrict;
                 },
-                async loadUpazilas() {
+                async loadUpazilas(selectedUpazila = '') {
                     this.locationError = '';
                     this.upazila = '';
                     if (!this.district) { this.upazilas = []; return; }
@@ -186,17 +192,18 @@
                         return;
                     }
                     this.upazilas = await response.json();
+                    this.upazila = selectedUpazila;
                 },
                 async init() {
                     this.$watch('paymentPlan', (plan) => {
                         if (plan === 'advance' && this.payment === 'cod') this.payment = 'bkash';
                     });
                     if (this.division) {
-                        await this.loadDistricts();
-                        this.district = @js(old('district_id', ''));
+                        const selectedDistrict = this.district;
+                        const selectedUpazila = this.upazila;
+                        await this.loadDistricts(selectedDistrict);
                         if (this.district) {
-                            await this.loadUpazilas();
-                            this.upazila = @js(old('upazila_id', ''));
+                            await this.loadUpazilas(selectedUpazila);
                         }
                     }
                 },

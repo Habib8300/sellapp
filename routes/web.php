@@ -52,7 +52,10 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [CustomerAccountController::class, 'dashboard'])->name('dashboard');
     Route::post('/addresses', [CustomerAccountController::class, 'storeAddress'])->name('addresses.store');
+    Route::put('/addresses/{address}', [CustomerAccountController::class, 'updateAddress'])->name('addresses.update');
+    Route::post('/addresses/{address}/default', [CustomerAccountController::class, 'setDefaultAddress'])->name('addresses.default');
     Route::delete('/addresses/{address}', [CustomerAccountController::class, 'destroyAddress'])->name('addresses.destroy');
+    Route::post('/orders/{order}/reorder', [CustomerAccountController::class, 'reorder'])->name('orders.reorder');
     Route::post('/order-items/{orderItem}/review', [CustomerAccountController::class, 'review'])->middleware('throttle:checkout')->name('reviews.store');
     Route::post('/order-items/{orderItem}/return', [CustomerAccountController::class, 'returnRequest'])->middleware('throttle:checkout')->name('returns.store');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -83,13 +83,15 @@ it('seeds all Bangladesh divisions, districts, and upazilas idempotently', funct
 
     expect(Division::count())->toBe(8)
         ->and(District::count())->toBe(64)
-        ->and(Upazila::count())->toBe(491);
+        ->and(Upazila::count())->toBe(503)
+        ->and(Upazila::query()->where('location_type', 'city')->count())->toBe(12);
 
     $this->seed(BangladeshLocationSeeder::class);
 
     expect(Division::count())->toBe(8)
         ->and(District::count())->toBe(64)
-        ->and(Upazila::count())->toBe(491);
+        ->and(Upazila::count())->toBe(503)
+        ->and(Upazila::query()->where('location_type', 'city')->count())->toBe(12);
 });
 
 it('limits store settings access to administrators', function (): void {

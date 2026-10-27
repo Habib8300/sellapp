@@ -24,7 +24,7 @@ class LocationController extends Controller
             Upazila::query()
                 ->where('district_id', $districtId)
                 ->orderBy('name')
-                ->get(['id', 'name', 'name_bn']),
+                ->get(['id', 'name', 'name_bn', 'location_type']),
         );
     }
 }

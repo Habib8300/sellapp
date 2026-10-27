@@ -15,6 +15,8 @@ class Address extends Model
         'division_id',
         'district_id',
         'upazila_id',
+        'campus_id',
+        'locality',
         'address',
         'is_default',
     ];
@@ -42,5 +44,10 @@ class Address extends Model
     public function upazila(): BelongsTo
     {
         return $this->belongsTo(Upazila::class);
+    }
+
+    public function campus(): BelongsTo
+    {
+        return $this->belongsTo(Campus::class);
     }
 }

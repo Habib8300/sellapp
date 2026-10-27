@@ -11,6 +11,7 @@ class Upazila extends Model
         'district_id',
         'name',
         'name_bn',
+        'location_type',
         'slug',
     ];
 

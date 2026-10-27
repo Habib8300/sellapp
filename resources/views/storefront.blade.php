@@ -98,72 +98,76 @@
             class="home-banners"
             aria-label="প্রচারমূলক ব্যানার"
             x-data="{
-                activeIndex: 0,
-                offset: 0,
-                visibleCount: 2,
+                activePage: 0,
+                visibleCount: window.matchMedia('(max-width: 700px)').matches ? 1 : 2,
                 slideCount: {{ $banners->count() }},
                 timer: null,
-                resizeObserver: null,
-                measure() {
-                    this.visibleCount = window.matchMedia('(max-width: 700px)').matches ? 1 : 2;
-                    this.activeIndex = Math.min(this.activeIndex, Math.max(0, this.slideCount - this.visibleCount));
-                    const card = this.$refs.track.querySelector('.home-banner-card');
-                    this.offset = card ? this.activeIndex * card.getBoundingClientRect().width : 0;
+                resizeHandler: null,
+                get pageCount() {
+                    return Math.ceil(this.slideCount / this.visibleCount);
+                },
+                goTo(page) {
+                    this.activePage = (page + this.pageCount) % this.pageCount;
+                    window.clearInterval(this.timer);
+                    this.timer = window.setInterval(() => this.goTo(this.activePage + 1), 5000);
                 },
                 next() {
-                    const lastIndex = Math.max(0, this.slideCount - this.visibleCount);
-                    this.activeIndex = this.activeIndex >= lastIndex ? 0 : this.activeIndex + 1;
-                    this.measure();
+                    this.goTo(this.activePage + 1);
                 },
                 previous() {
-                    const lastIndex = Math.max(0, this.slideCount - this.visibleCount);
-                    this.activeIndex = this.activeIndex <= 0 ? lastIndex : this.activeIndex - 1;
-                    this.measure();
+                    this.goTo(this.activePage - 1);
                 },
                 init() {
-                    this.$nextTick(() => {
-                        this.measure();
-                        this.resizeObserver = new ResizeObserver(() => this.measure());
-                        this.resizeObserver.observe(this.$refs.viewport);
-                        this.timer = window.setInterval(() => this.next(), 10000);
-                    });
+                    this.$nextTick(() => this.$el.classList.add('is-ready'));
+                    this.resizeHandler = () => {
+                        const visibleCount = window.matchMedia('(max-width: 700px)').matches ? 1 : 2;
+
+                        if (visibleCount !== this.visibleCount) {
+                            this.visibleCount = visibleCount;
+                            this.activePage = 0;
+                        }
+                    };
+                    window.addEventListener('resize', this.resizeHandler);
+                    this.timer = window.setInterval(() => this.next(), 5000);
                 },
                 destroy() {
                     window.clearInterval(this.timer);
-                    this.resizeObserver?.disconnect();
+                    window.removeEventListener('resize', this.resizeHandler);
                 }
             }"
+            aria-roledescription="carousel"
+            aria-live="polite"
         >
-            <div class="home-banners__viewport" x-ref="viewport">
-                <div class="home-banners__track" x-ref="track" :style="'transform: translate3d(-' + offset + 'px, 0, 0)'">
-                    @foreach ($banners as $banner)
-                        <a
-                            href="{{ $banner->link_url ?: route('catalog.index', absolute: false) }}"
-                            class="home-banner-card"
-                            aria-label="{{ $banner->title }}"
-                        >
-                            @if ($banner->image_path)
-                                <img src="{{ asset('storage/'.ltrim($banner->image_path, '/')) }}" alt="" aria-hidden="true" @if ($loop->first) fetchpriority="high" @else loading="lazy" @endif>
-                            @else
-                                <span class="home-banner-card__fallback" aria-hidden="true">
-                                    <svg viewBox="0 0 180 190"><path d="m55 19 35 13 35-13 34 22-18 33-18-10v103H57V64L39 74 21 41l34-22Z"/><path d="M69 25c2 15 10 23 21 23s19-8 21-23"/></svg>
-                                </span>
-                            @endif
-                        </a>
-                    @endforeach
-                </div>
+            <div class="home-banners__grid">
+                @foreach ($banners as $banner)
+                    <a
+                        href="{{ $banner->link_url ?: route('catalog.index', absolute: false) }}"
+                        class="home-banner-card"
+                        role="group"
+                        aria-roledescription="স্লাইড"
+                        aria-label="{{ $banner->title }} — {{ $loop->iteration }} / {{ $banners->count() }}"
+                        x-show="Math.floor({{ $loop->index }} / visibleCount) === activePage"
+                        @if ($loop->index >= 2) x-cloak @endif
+                    >
+                        @if ($banner->image_path)
+                            <img src="{{ asset('storage/'.ltrim($banner->image_path, '/')) }}" alt="" aria-hidden="true" @if ($loop->first) fetchpriority="high" @else loading="lazy" @endif>
+                        @else
+                            <span class="home-banner-card__fallback" aria-hidden="true">
+                                <svg viewBox="0 0 180 190"><path d="m55 19 35 13 35-13 34 22-18 33-18-10v103H57V64L39 74 21 41l34-22Z"/><path d="M69 25c2 15 10 23 21 23s19-8 21-23"/></svg>
+                            </span>
+                        @endif
+                    </a>
+                @endforeach
             </div>
-            @if ($banners->count() > 2)
-                <div class="home-banners__controls">
-                    <button type="button" class="home-banners__arrow" aria-label="আগের ব্যানার" @click="previous(); window.clearInterval(timer); timer = window.setInterval(() => next(), 10000)">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-                    </button>
-                    <span class="home-banners__counter"><span x-text="activeIndex + 1"></span> / <span x-text="Math.max(1, slideCount - visibleCount + 1)"></span></span>
-                    <button type="button" class="home-banners__arrow" aria-label="পরের ব্যানার" @click="next(); window.clearInterval(timer); timer = window.setInterval(() => next(), 10000)">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                    </button>
-                </div>
-            @endif
+            <div class="home-banners__controls" x-cloak x-show="pageCount > 1">
+                <button type="button" class="home-banners__arrow" aria-label="আগের ব্যানার" @click="previous()">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span class="home-banners__counter" aria-live="polite"><span x-text="activePage + 1"></span> / <span x-text="pageCount"></span></span>
+                <button type="button" class="home-banners__arrow" aria-label="পরের ব্যানার" @click="next()">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </div>
         </section>
     @endif
 
